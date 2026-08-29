@@ -13,27 +13,27 @@ use FFans\BbcodeStudio\Formatter\RegisterShortLinkResolver;
 use FFans\BbcodeStudio\Frontend\StyleServiceProvider;
 
 return [
-    new Extend\Frontend('forum')
+    (new Extend\Frontend('forum'))
         ->js(__DIR__ . '/js/dist/forum.js')
         ->css(__DIR__ . '/less/forum.less'),
 
-    new Extend\Frontend('admin')
+    (new Extend\Frontend('admin'))
         ->js(__DIR__ . '/js/dist/admin.js')
         ->css(__DIR__ . '/less/admin.less'),
 
     new Extend\Locales(__DIR__ . '/locale'),
 
-    new Extend\ServiceProvider()
+    (new Extend\ServiceProvider())
         ->register(StyleServiceProvider::class),
 
-    new Extend\Formatter()
+    (new Extend\Formatter())
         ->configure(ConfigureFormatter::class)
         ->parse(RegisterShortLinkResolver::class),
 
-    new Extend\ApiResource(Resource\ForumResource::class)
+    (new Extend\ApiResource(Resource\ForumResource::class))
         ->fields(ForumResourceFields::class),
 
-    new Extend\Routes('api')
+    (new Extend\Routes('api'))
         ->get('/ffans-bbcode-studio/rules', 'ffans-bbcode-studio.rules.index', ListRulesController::class)
         ->post('/ffans-bbcode-studio/rules', 'ffans-bbcode-studio.rules.create', CreateRuleController::class)
         ->post('/ffans-bbcode-studio/rules/test-media', 'ffans-bbcode-studio.rules.test-media', TestMediaRuleController::class)
