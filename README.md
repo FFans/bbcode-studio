@@ -1,19 +1,19 @@
 # FFans BBcode Studio
 
 [![License](https://img.shields.io/packagist/l/ffans/bbcode-studio.svg)](https://packagist.org/packages/ffans/bbcode-studio)
-[![Flarum](https://img.shields.io/badge/dynamic/json?color=4d698e&label=flarum&query=%24.require.%22flarum%2Fcore%22&url=https%3A%2F%2Fraw.githubusercontent.com%2FFFans%2Fbbcode-studio%2F2.x%2Fcomposer.json)](https://docs.flarum.org)
+[![Flarum](https://img.shields.io/badge/dynamic/json?label=Flarum&query=%24.require%5B%22flarum%2Fcore%22%5D&url=https%3A%2F%2Fraw.githubusercontent.com%2FFFans%2Fbbcode-studio%2F2.x%2Fcomposer.json)](https://docs.flarum.org/)
 [![Latest Version](https://img.shields.io/github/v/tag/FFans/bbcode-studio?filter=v2.*&label=version)](https://github.com/FFans/bbcode-studio/releases)
 [![Release Date](https://img.shields.io/github/release-date/FFans/bbcode-studio)](https://github.com/FFans/bbcode-studio/releases)
 [![Total Downloads](https://img.shields.io/packagist/dt/ffans/bbcode-studio)](https://packagist.org/packages/ffans/bbcode-studio)
 [![Monthly Downloads](https://img.shields.io/packagist/dm/ffans/bbcode-studio)](https://packagist.org/packages/ffans/bbcode-studio)
 
-A [Flarum](https://flarum.org/) extension. Create and manage custom s9e TextFormatter-based BBCode and media embed rules.
+A [Flarum](https://flarum.org/) extension. Create custom BBCode, link recognition, and automatic media embedding rules, powered by s9e TextFormatter.
 
 This extension was developed with AI assistance. Custom rendering rules can load third-party content, so administrators should review the service provider's privacy policy before enabling them.
 
 ## Preview
 
-![preview](docs/images/preview.png)
+![preview](docs/images/preview.png?raw=true)
 
 ## Features
 
@@ -26,6 +26,7 @@ This extension was developed with AI assistance. Custom rendering rules can load
   - Custom BBCode roots receive `BbcodeStudio-bbcode` and `BbcodeStudio-bbcode-{tag}` classes for category-wide or per-rule styling.
   - Custom BBCode can configure default tag attributes inserted by its composer button.
 - Media embeds
+  - Automatically detect URLs and convert them into iframes or other embedded media based on rules.
   - Media embeds define PHP PCRE-based rules that extract resource identifiers from URLs, along with player dimensions.
   - Media roots receive `BbcodeStudio-media` and `BbcodeStudio-media-{tag}` classes for category-wide or per-rule styling.
   - Recognition rules are divided into **Direct extraction** and **Short-link redirect**. Because short links do not contain the platform resource identifier, the backend records the redirected URL when a post is saved and then processes it with the extraction rules.
