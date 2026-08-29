@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.5/phpunit.xsd"
+         bootstrap="../vendor/autoload.php"
+         cacheResult="false"
+         colors="true">
+    <source ignoreIndirectDeprecations="true">
+        <include>
+            <directory suffix=".php">../src</directory>
+            <directory suffix=".php">../migrations</directory>
+            <file>../extend.php</file>
+        </include>
+    </source>
+    <testsuites>
+        <testsuite name="FFans BBcode Studio integration tests">
+            <directory>integration</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

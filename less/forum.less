@@ -1,0 +1,37 @@
+.Post-body {
+  .BbcodeStudio-bbcode,
+  .BbcodeStudio-embed {
+    margin-bottom: 1em;
+  }
+}
+
+.Post-body .BbcodeStudio-embed,
+.ComposerPostPreview .BbcodeStudio-embed,
+[data-s9e-mediaembed^='ffansbbcode'] {
+  display: block;
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  overflow: hidden;
+  border-radius: var(--border-radius);
+  background: var(--control-bg);
+
+  &.BbcodeStudio-media-netease {
+    background: linear-gradient(var(--control-bg), var(--control-bg)) center / calc(100% - 20px) calc(100% - 20px) no-repeat;
+  }
+}
+
+.Post-body .BbcodeStudio-embed,
+.ComposerPostPreview .BbcodeStudio-embed {
+  aspect-ratio: var(--bbcode-studio-aspect-ratio, 16 / 9);
+}
+
+.Post-body .BbcodeStudio-embed iframe,
+.ComposerPostPreview .BbcodeStudio-embed iframe,
+[data-s9e-mediaembed^='ffansbbcode'] iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}

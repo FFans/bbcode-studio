@@ -1,0 +1,157 @@
+ffans-bbcode-studio:
+  admin:
+    page:
+      security_notice: 自定义 BBCode 和媒体嵌入会由 Flarum 格式化器编译并检查。启用前，请逐项确认用法和渲染模板，错误的配置可能导致帖子无法正常解析或显示。嵌入第三方内容时，还应确认服务来源可信。
+      empty: 暂无模板。
+    actions:
+      create: 创建模板
+      edit: 编辑模板
+      delete: 删除模板
+      save: 保存模板
+      test_url: 测试网址
+      reset: 恢复默认值
+      add_source_rule: 添加识别规则
+      remove_source_rule: 删除识别规则
+    groups:
+      bbcode_title: 自定义 BBCode
+      bbcode_description: 自定义标签用法、渲染模板和样式。
+      bbcode_empty: 暂无自定义 BBCode 模板。
+      media_title: 媒体嵌入
+      media_description: 识别媒体链接并渲染为嵌入内容。
+      media_empty: 暂无媒体嵌入模板。
+      rule_count: 共 {count} 条模板
+    status:
+      built_in: 内置
+      enabled: 已启用
+      disabled: 已停用
+      toolbar: 编辑器按钮
+      media_recognition: 链接识别
+      type_bbcode: 自定义 BBCode
+      type_media: 媒体嵌入
+    confirm:
+      delete: 确定删除“{name}”吗？历史帖子将不再使用此渲染模板，但编辑时仍可查看原始内容。
+      reset: 确定将“{name}”恢复为默认值吗？当前未保存的修改将被替换。
+    messages:
+      saved: 模板已保存。
+      deleted: 模板已删除。
+      defaults_restored: 已恢复默认值，请保存以应用修改。
+    modal:
+      create_title: 创建模板
+      edit_title: 编辑模板
+    fields:
+      rule_type_label: 模板类型
+      rule_type_help: 自定义 BBCode 自行定义用法和模板。内置模板的类型不可修改。
+      rule_type_bbcode: 自定义 BBCode
+      rule_type_media: 媒体嵌入
+      name_label: 名称
+      name_help: 定义模板名称。内置模板名称不可编辑。
+      tag_label: 标签
+      tag_help: 不含方括号的小写 BBCode 标签，例如 bilibili。
+      description_label: 备注
+      description_help: 描述当前自定义 BBCode 用途。
+      usage_label: BBCode 用法
+      usage_help: s9e BBCode 定义，例如 [notice color=颜色]文本[/notice]；参数名 color 在模板中写作 @color。
+      template_label: 渲染模板
+      template_help: 安全的 s9e XSL 模板。模板引用的 @参数必须由 BBCode 用法声明，保存前会实际编译并检查。查看 <a>s9e XSL 模板语法文档</a>。
+      dom_class_label: 自动 DOM class
+      dom_class_help: 扩展会把该 class 添加到渲染模板输出的每个顶层 HTML 元素；下方样式会自动以它作为作用域。
+      css_declarations_label: 自定义样式
+      css_declarations_help: "自定义 CSS/Less 样式，例如 <code>color: red;</code> 支持子选择器和状态选择器。"
+      icon_label: 图标
+      icon_help: Font Awesome 类名，例如 fas fa-code 或 fab fa-youtube。
+      button_label_label: 按钮名称
+      button_label_help: 编辑器提示或下拉菜单名称。内置按钮名称由语言包翻译且不可在此编辑；自定义规则留空时使用模板名称。
+      example_label: 默认插入内容
+      example_help: 点击编辑器按钮，无文字选中时默认插入的内容。
+      example_attributes_label: 自动插入属性
+      example_attributes_help: 属性标签由 BBCode 用法自动识别。可选择声明的值、插入空值作为用户填写提示，或不在编辑器中插入该属性。
+      example_attribute_value: 指定值
+      example_attribute_empty: "插入 {attribute}="
+      example_attribute_omit: 不插入
+      example_attribute_edit_accessible: 配置属性 {attribute} 的自动插入方式
+      enabled_label: 启用模板
+      toolbar_enabled_label: 添加编辑器按钮
+      media_group: 媒体识别配置
+      source_rule_extract: 直接识别
+      source_rule_redirect: 短链识别
+      source_rule_number: "来源规则 #{number}"
+      source_hosts_prefix: 来源域名：
+      capture_variables_prefix: 变量：
+      source_rule_extract_help: 从完整 URL 中提取用于嵌入的内容，变量提取请使用 PCRE 正则捕获组。
+      source_rule_redirect_help: 适用于短链接。保存帖子时由服务器记录跳转后的 URL，再进行直接识别。
+      embed_url_label: 嵌入地址
+      embed_url_help: 请使用 HTTPS 或以 // 开头的 iframe 嵌入地址。点击插入变量：
+      capture_values_empty: 尚未识别到变量
+      iframe_attributes_label: iframe 属性
+      iframe_attributes_help: 使用空格分隔的 name='value' 格式，只支持 allow、referrerpolicy、allowfullscreen、 scrolling 和 height 属性。allowfullscreen 可省略值。宽高比留空时，必须设置固定高度，例如 height='86'。
+      aspect_ratio_label: 宽高比
+      aspect_ratio_help: 媒体播放器的响应式比例，例如 16 / 9；固定高度播放器可留空，并在 iframe 属性中设置 height。
+      test_url_label: 测试
+      test_url_help: 使用 PHP PCRE 测试当前尚未保存的规则。仅在点击测试时由服务器解析。
+      sort_order_label: 排序值
+      sort_order_help: 用于排序编辑器中的自定义 BBCode 图标。
+    test:
+      matched: "已匹配{type}规则 #{number}"
+      embed_url: 嵌入地址
+      empty_url: 请输入要测试的网址。
+      url_too_long: 测试网址不能超过 2000 个字符。
+      missing_embed_capture: 嵌入地址必须包含至少一个命名捕获变量。
+      invalid_embed_url: 嵌入地址必须使用 HTTPS 或以 // 开头。
+      invalid_pattern: "来源规则 #{number} 不是包含明确域名的有效 PCRE。"
+      missing_pattern_capture: "直接识别规则 #{number} 未提供嵌入地址使用的全部变量。"
+      missing_extract_rule: 请至少添加一条直接识别规则。
+      empty_capture: "规则 #{number} 已匹配，但必要的捕获值为空。"
+      redirect_failed: "短链规则 #{number} 已匹配，但服务器无法将其解析为受支持的完整网址。"
+      no_match: 该网址未匹配任何来源规则。
+      request_failed: 测试请求失败，请检查网络连接后重试。
+  api:
+    validation:
+      usage_tag_mismatch: BBCode 用法的起始标签和结束标签必须与当前配置的标签完全一致。
+      example_attributes_object: 自动插入属性必须是以属性名为键的对象。
+      example_attributes_limit: 最多只能配置 32 个自动插入属性。
+      example_attribute_text: 自动插入属性值必须是文本或留空。
+      example_attribute_length: 自动插入属性值不能超过 500 个字符。
+      example_attribute_choice: 属性 {attribute} 的自动插入值必须是该属性声明的可选值之一。
+      source_rules_array: 媒体来源规则必须是数组。
+      source_rule_invalid: "媒体来源规则 #{number} 无效。"
+      source_rule_type: "媒体来源规则 #{number} 的类型无效。"
+      fixed_height_required: "固定高度的媒体规则必须包含正整数高度，例如 height='86'。"
+      aspect_ratio_positive: 宽高比的两个数值都必须大于零。
+      embed_capture_required: 嵌入地址必须引用至少一个命名捕获变量。
+      extract_hostname_required: "直接识别规则 #{number} 必须包含至少一个明确的域名。"
+      extract_capture_required: "直接识别规则 #{number} 必须包含至少一个命名捕获组。"
+      embed_capture_mismatch: 嵌入地址中的每个占位符都必须匹配每条直接识别规则中的命名捕获组。
+      extract_regexp_invalid: "直接识别规则 #{number} 不是有效的正则表达式。"
+      redirect_hostname_required: "短链规则 #{number} 必须包含至少一个明确的域名。"
+      redirect_regexp_invalid: "短链规则 #{number} 不是有效的正则表达式。"
+      embed_url_https: 嵌入地址必须使用 HTTPS 或以 // 开头。
+      bbcode_definition_invalid: BBCode 用法或渲染模板无效。
+      template_attributes_undeclared: "渲染模板引用了 BBCode 用法中未声明的属性：{attributes}。"
+      media_definition_invalid: 媒体嵌入定义无效。
+      built_in_delete: 不能删除内置 BBCode Studio 模板。
+      styles_imports_unsupported: 自定义 BBCode 样式不支持 Less 导入和插件。
+      styles_unsafe_value: 自定义样式包含不安全的 CSS 值。
+      styles_invalid: 自定义 Less 样式无效。
+      styles_close_scope: 自定义样式不能闭合自动生成的 class 作用域。
+      styles_unclosed: 自定义样式包含未闭合的注释、引号或代码块。
+      template_requires_element: 渲染模板必须输出至少一个 HTML 元素，才能应用自动生成的 class。
+      regexp_delimiter_required: 正则表达式必须使用分隔符。
+      regexp_delimiter_unclosed: 正则表达式的分隔符未闭合。
+      iframe_attribute_format: "iframe 属性必须使用 name 或 name='value' 格式。"
+      iframe_attribute_not_allowed: 不允许使用 iframe 属性“{attribute}”。
+      iframe_attribute_repeated: iframe 属性“{attribute}”不能重复。
+      iframe_attribute_requires_value: iframe 属性“{attribute}”必须使用引号包裹属性值。
+      iframe_attribute_static_value: iframe 属性值必须是静态文本。
+      iframe_attribute_quote_types: iframe 属性值不能同时包含两种引号。
+  forum:
+    toolbar:
+      title: 插入 BBCode
+      built_in:
+        notice: 提示框
+        kdb: 键盘按键
+        spoiler: 剧透
+        bilibili: 哔哩哔哩
+        youtube: YouTube
+        vimeo: Vimeo
+        spotify: Spotify
+        netease: 网易云音乐

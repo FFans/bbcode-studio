@@ -1,0 +1,6 @@
+/vendor/
+/composer.lock
+/.phpunit.cache/
+/js/node_modules/
+/js/dist/
+.idea/

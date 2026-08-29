@@ -1,0 +1,79 @@
+{
+    "name": "ffans/bbcode-studio",
+    "description": "Custom BBCode rules, media embeds, and composer buttons for Flarum.",
+    "type": "flarum-extension",
+    "license": "MIT",
+    "keywords": [
+        "flarum",
+        "bbcode",
+        "formatter",
+        "media",
+        "embed"
+    ],
+    "homepage": "https://github.com/FFans/bbcode-studio",
+    "support": {
+        "issues": "https://github.com/FFans/bbcode-studio/issues",
+        "source": "https://github.com/FFans/bbcode-studio",
+        "forum": "https://discuss.flarum.org/d/39753"
+    },
+    "funding": [
+        {
+            "type": "website",
+            "url": "https://opencollective.com/ffans/donate"
+        }
+    ],
+    "authors": [
+        {
+            "name": "Golden",
+            "email": "thatsgolden@outlook.com",
+            "homepage": "https://github.com/thatsgolden",
+            "role": "Developer"
+        },
+        {
+            "name": "FFans",
+            "homepage": "https://github.com/FFans"
+        }
+    ],
+    "require": {
+        "flarum/core": "^2.0.0",
+        "s9e/text-formatter": "^2.19"
+    },
+    "require-dev": {
+        "flarum/testing": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "FFans\\BbcodeStudio\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "FFans\\BbcodeStudio\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": [
+            "@test:unit",
+            "@test:integration"
+        ],
+        "test:unit": "@php vendor/bin/phpunit -c tests/phpunit.unit.xml",
+        "test:integration": "@php vendor/bin/phpunit -c tests/phpunit.integration.xml",
+        "test:setup": "@php tests/integration/setup.php"
+    },
+    "extra": {
+        "flarum-extension": {
+            "title": "FFans BBcode Studio",
+            "category": "feature",
+            "links": {
+                "forumZh": "https://discuss.flarum.org.cn/d/16554"
+            },
+            "icon": {
+                "name": "fas fa-code",
+                "backgroundColor": "#6f42c1",
+                "color": "#ffffff"
+            }
+        }
+    },
+    "minimum-stability": "beta",
+    "prefer-stable": true
+}

@@ -1,0 +1,415 @@
+.BbcodeStudioPage-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.BbcodeStudioPage-header h2 {
+  margin: 0 0 6px;
+}
+
+.BbcodeStudioPage-securityNotice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.BbcodeStudioRuleList {
+  display: grid;
+  gap: 12px;
+}
+
+.BbcodeStudioRuleGroups {
+  display: grid;
+  gap: 32px;
+}
+
+.BbcodeStudioRuleGroup-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0;
+    color: var(--text-color);
+    font-size: 17px;
+    line-height: 1.4;
+  }
+
+  h2 .icon {
+    width: 18px;
+    color: var(--primary-color);
+    text-align: center;
+  }
+
+  p {
+    margin: 4px 0 0 27px;
+    color: var(--muted-color);
+    font-size: 13px;
+  }
+
+  > .Badge {
+    width: auto;
+    padding: 0 8px;
+    box-shadow: none;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.BbcodeStudioRuleGroup-empty {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px dashed var(--control-bg);
+  border-radius: var(--border-radius);
+  color: var(--muted-color);
+  background: color-mix(in srgb, var(--control-bg) 35%, transparent);
+}
+
+.BbcodeStudioRuleCard {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--control-bg);
+  border-radius: var(--border-radius);
+  background: var(--body-bg);
+
+  .Badge {
+    width: auto;
+    padding: 0 8px;
+    box-shadow: none;
+  }
+}
+
+.BbcodeStudioRuleCard.is-disabled {
+  opacity: 0.62;
+}
+
+.BbcodeStudioRuleCard-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  color: var(--primary-color);
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  font-size: 18px;
+}
+
+.BbcodeStudioRuleCard-heading,
+.BbcodeStudioRuleCard-meta,
+.BbcodeStudioRuleCard-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.BbcodeStudioRuleCard-heading h3,
+.BbcodeStudioRuleCard-main p {
+  margin: 0;
+}
+
+.BbcodeStudioRuleCard-main p {
+  margin-top: 6px;
+  color: var(--muted-color);
+}
+
+.BbcodeStudioRuleCard-meta {
+  flex-wrap: wrap;
+  margin-top: 9px;
+  color: var(--muted-color);
+  font-size: 12px;
+}
+
+.BbcodeStudioRuleForm-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px 16px;
+}
+
+.BbcodeStudioRuleForm textarea.FormControl {
+  min-height: auto;
+  resize: vertical;
+  font-family: var(--code-font, monospace);
+}
+
+.BbcodeStudioRuleForm-switches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+}
+
+.BbcodeStudioRuleForm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.BbcodeStudioRuleForm-media {
+  margin: 0 0 20px;
+  padding: 16px;
+  border: 1px solid var(--control-bg);
+  border-radius: var(--border-radius);
+}
+
+.BbcodeStudioRuleForm-tokens {
+  display: flex;
+  flex-direction: column;
+}
+
+.BbcodeStudioRuleForm-captures {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.BbcodeStudioRuleForm-tokens {
+  border: 1px solid var(--control-bg);
+  border-radius: var(--border-radius);
+  color: var(--muted-color);
+  background: var(--control-bg);
+}
+
+.BbcodeStudioRuleForm-tokens code {
+  color: var(--text-color);
+}
+
+.BbcodeStudioRuleForm-captures {
+  color: var(--muted-color);
+}
+
+.BbcodeStudioRuleForm-captures .Button {
+  padding: 4px 0 4px 0;
+  min-height: auto;
+  font-family: var(--code-font, monospace);
+}
+
+.Form-group.BbcodeStudioSourceRules {
+  > .BbcodeStudioSourceRules-heading {
+    justify-content: space-between;
+    width: 100%;
+  }
+}
+
+.BbcodeStudioSourceRules-heading,
+.BbcodeStudioSourceRule-toolbar,
+.BbcodeStudioSourceRule-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.BbcodeStudioSourceRules-list {
+  display: grid;
+  width: 100%;
+  gap: 12px;
+}
+
+.BbcodeStudioSourceRule {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--control-bg);
+  border-radius: var(--border-radius);
+  background: color-mix(in srgb, var(--control-bg) 25%, transparent);
+}
+
+.BbcodeStudioSourceRule-toolbar .FormControl {
+  flex: 1;
+}
+
+.BbcodeStudioSourceRule-number {
+  flex: 0 0 28px;
+  color: var(--muted-color);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.BbcodeStudioSourceRule > .FormControl {
+  font-family: var(--code-font, monospace);
+}
+
+.BbcodeStudioSourceRule-meta {
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.BbcodeStudioSourceRule-help {
+  flex-basis: 100%;
+}
+
+.BbcodeStudioSourceRule-metaGroup {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px 6px;
+}
+
+.BbcodeStudioRuleTest-row {
+  width: 100%;
+}
+
+.BbcodeStudioRuleTest-row,
+.BbcodeStudioRuleTest-status,
+.BbcodeStudioRuleTest-detail {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.BbcodeStudioRuleTest-row .FormControl {
+  min-width: 0;
+}
+
+.BbcodeStudioRuleTest-row .Button {
+  flex: 0 0 auto;
+}
+
+.BbcodeStudioRuleTest-result {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--control-bg);
+  border-radius: var(--border-radius);
+  background: color-mix(in srgb, var(--control-bg) 25%, transparent);
+
+  &.is-success > .BbcodeStudioRuleTest-status .icon {
+    color: var(--control-success-color);
+  }
+
+  &.is-error {
+    grid-template-columns: auto minmax(0, 1fr);
+    color: var(--error-color);
+  }
+}
+
+.BbcodeStudioRuleTest-detail {
+  align-items: flex-start;
+  flex-wrap: wrap;
+
+  > :last-child {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+.BbcodeStudioExampleAttributes-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.BbcodeStudioExampleAttribute {
+  .Dropdown-toggle {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-areas:
+      "label caret"
+      "helper helper";
+    align-items: center;
+    column-gap: 6px;
+    min-width: 112px;
+    padding: 7px 10px;
+    text-align: left;
+  }
+
+  .Button-label {
+    display: contents;
+  }
+
+  .Button-labelText {
+    grid-area: label;
+    font-family: var(--code-font, monospace);
+    font-weight: 600;
+  }
+
+  .Button-helperText {
+    grid-area: helper;
+    max-width: 220px;
+    overflow: hidden;
+    color: var(--muted-color);
+    font-family: var(--code-font, monospace);
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .Button-caret {
+    grid-area: caret;
+  }
+
+  &.is-configured .Dropdown-toggle {
+    border-color: var(--primary-color);
+  }
+}
+
+.BbcodeStudioExampleAttribute-menu {
+  min-width: 260px;
+  padding: 6px 0;
+}
+
+.BbcodeStudioExampleAttribute-heading,
+.BbcodeStudioExampleAttribute-input {
+  padding: 8px 12px;
+}
+
+.BbcodeStudioExampleAttribute-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  code {
+    color: var(--muted-color);
+    font-size: 11px;
+  }
+}
+
+.BbcodeStudioExampleAttribute-input label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--muted-color);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+@media @phone {
+  .BbcodeStudioPage-header,
+  .BbcodeStudioRuleCard {
+    display: flex;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .BbcodeStudioRuleForm-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .BbcodeStudioSourceRules-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .BbcodeStudioRuleTest-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .BbcodeStudioRuleGroup-heading p {
+    margin-left: 0;
+  }
+}
