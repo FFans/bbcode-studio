@@ -128,12 +128,13 @@ LESS,
                 'fab fa-bilibili',
                 'Bilibili',
                 'https://www.bilibili.com/video/BV1GJ411x7h7',
-                '!bilibili\.com/video/(?<id>BV[a-zA-Z0-9]+)!',
+                '!bilibili\.com/video/(?<id>BV[a-zA-Z0-9]+)(?:\?(?:[^#\s&]*&)*p=(?<p>[1-9]\d*)(?=[&#\s]|$))?!',
                 '!b23\.tv/[a-zA-Z0-9]+!',
-                '//player.bilibili.com/player.html?bvid={id}&p=1&autoplay=false',
+                '//player.bilibili.com/player.html?bvid={id}&p={p}&autoplay=false',
                 "scrolling='no' allowfullscreen",
                 '16 / 9',
-                50
+                50,
+                ['p' => '1']
             ),
             'youtube' => self::media(
                 'YouTube',
@@ -228,6 +229,7 @@ LESS,
             'toolbarEnabled' => true,
             'extractPattern' => '',
             'sourceRules' => [],
+            'captureDefaults' => [],
             'embedUrl' => '',
             'iframeAttributes' => '',
             'aspectRatio' => '16 / 9',
@@ -248,7 +250,8 @@ LESS,
         string $embedUrl,
         string $iframeAttributes,
         string $aspectRatio,
-        int $sortOrder
+        int $sortOrder,
+        array $captureDefaults = []
     ): array {
         $sourceRules = [];
 
@@ -280,6 +283,7 @@ LESS,
             'toolbarEnabled' => true,
             'extractPattern' => $extractPattern,
             'sourceRules' => $sourceRules,
+            'captureDefaults' => $captureDefaults,
             'embedUrl' => $embedUrl,
             'iframeAttributes' => $iframeAttributes,
             'aspectRatio' => $aspectRatio,

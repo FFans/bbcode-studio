@@ -53,6 +53,32 @@ final class MediaRuleTesterTest extends TestCase
     }
 
     #[Test]
+    public function it_applies_capture_defaults_and_preserves_explicit_values(): void
+    {
+        $tester = $this->tester(new MockHandler());
+        $pattern = '!bilibili\.com/video/(?<id>BV[a-zA-Z0-9]+)(?:\?(?:[^#\s&]*&)*p=(?<p>[1-9]\d*)(?=[&#\s]|$))?!';
+        $embedUrl = '//player.bilibili.com/player.html?bvid={id}&p={p}&autoplay=false';
+
+        $default = $tester->test(
+            'https://www.bilibili.com/video/BV1Js411o76u',
+            [['type' => 'extract', 'pattern' => $pattern]],
+            $embedUrl,
+            ['p' => '1']
+        );
+        $explicit = $tester->test(
+            'https://www.bilibili.com/video/BV1Js411o76u?share_source=copy_web&p=2',
+            [['type' => 'extract', 'pattern' => $pattern]],
+            $embedUrl,
+            ['p' => '1']
+        );
+
+        $this->assertSame('1', $default['captures']['p']);
+        $this->assertSame('//player.bilibili.com/player.html?bvid=BV1Js411o76u&p=1&autoplay=false', $default['embedUrl']);
+        $this->assertSame('2', $explicit['captures']['p']);
+        $this->assertSame('//player.bilibili.com/player.html?bvid=BV1Js411o76u&p=2&autoplay=false', $explicit['embedUrl']);
+    }
+
+    #[Test]
     public function it_resolves_matching_short_urls(): void
     {
         $tester = $this->tester(new MockHandler([

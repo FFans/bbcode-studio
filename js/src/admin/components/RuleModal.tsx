@@ -42,6 +42,7 @@ const emptyRule = (): RuleFormData => ({
   toolbarEnabled: true,
   extractPattern: '',
   sourceRules: [{ type: 'extract', pattern: DEFAULT_MEDIA_SOURCE_PATTERN }],
+  captureDefaults: {},
   embedUrl: DEFAULT_MEDIA_EMBED_URL,
   iframeAttributes: DEFAULT_MEDIA_IFRAME_ATTRIBUTES,
   aspectRatio: '16 / 9',
@@ -545,6 +546,7 @@ export default class RuleModal extends FormModal<RuleModalAttrs> {
             attributes: {
               url: this.testUrl,
               sourceRules: this.data.sourceRules,
+              captureDefaults: this.data.captureDefaults,
               embedUrl: this.data.embedUrl,
             },
           },
@@ -629,6 +631,7 @@ export default class RuleModal extends FormModal<RuleModalAttrs> {
       sourceRules: source.sourceRules?.length
         ? source.sourceRules.map((rule) => ({ ...rule }))
         : this.sourceRulesFromLegacyPattern(source.extractPattern),
+      captureDefaults: { ...(source.captureDefaults || {}) },
       embedUrl: source.embedUrl,
       iframeAttributes: source.iframeAttributes,
       aspectRatio: source.aspectRatio,

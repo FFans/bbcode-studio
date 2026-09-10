@@ -19,10 +19,11 @@ class FormatterDefinitionTest extends TestCase
         $configurator->rendering->setEngine('PHP');
         $configurator->rendering->getEngine()->cacheDir = sys_get_temp_dir();
         $bilibiliTag = MediaRuleDefinition::configure($configurator, 'bilibili', 'ffansbbcodebilibili', [
-            'extract_pattern' => '!bilibili\.com/video/(?<id>BV[a-zA-Z0-9]+)!',
-            'embed_url' => '//player.bilibili.com/player.html?bvid={id}&p=1&autoplay=false',
+            'extract_pattern' => '!bilibili\.com/video/(?<id>BV[a-zA-Z0-9]+)(?:\?(?:[^#\s&]*&)*p=(?<p>[1-9]\d*)(?=[&#\s]|$))?!',
+            'embed_url' => '//player.bilibili.com/player.html?bvid={id}&p={p}&autoplay=false',
             'iframe_attributes' => "allowfullscreen scrolling='no'",
             'aspect_ratio' => '16 / 9',
+            'capture_defaults' => ['p' => '1'],
         ]);
         $youtubeTag = MediaRuleDefinition::configure($configurator, 'youtube', 'ffansbbcodeyoutube', [
             'extract_pattern' => '!youtube\.com/shorts/(?<id>[-\w]+)!',
@@ -39,13 +40,19 @@ class FormatterDefinitionTest extends TestCase
         $components = $configurator->finalize();
         $taggedXml = $components['parser']->parse('[bilibili]https://www.bilibili.com/video/BV1xx411c7mD[/bilibili]');
         $plainXml = $components['parser']->parse('https://www.bilibili.com/video/BV1xx411c7mD');
+        $partXml = $components['parser']->parse('https://www.bilibili.com/video/BV1Js411o76u?p=2');
+        $taggedPartXml = $components['parser']->parse('[bilibili]https://www.bilibili.com/video/BV1Js411o76u?p=2[/bilibili]');
         $wrongTagXml = $components['parser']->parse('[bilibili]https://www.youtube.com/shorts/IBKjPRS1ZqE[/bilibili]');
         $taggedHtml = $components['renderer']->render($taggedXml);
         $plainHtml = $components['renderer']->render($plainXml);
+        $partHtml = $components['renderer']->render($partXml);
+        $taggedPartHtml = $components['renderer']->render($taggedPartXml);
         $wrongTagHtml = $components['renderer']->render($wrongTagXml);
 
         $this->assertSame($plainHtml, $taggedHtml);
         $this->assertStringContainsString('//player.bilibili.com/player.html?bvid=BV1xx411c7mD&amp;p=1&amp;autoplay=false', $taggedHtml);
+        $this->assertStringContainsString('//player.bilibili.com/player.html?bvid=BV1Js411o76u&amp;p=2&amp;autoplay=false', $partHtml);
+        $this->assertSame($partHtml, $taggedPartHtml);
         $this->assertStringContainsString('<iframe', $taggedHtml);
         $this->assertMatchesRegularExpression('/\sallowfullscreen(?:="")?/', $taggedHtml);
         $this->assertStringContainsString('scrolling="no"', $taggedHtml);

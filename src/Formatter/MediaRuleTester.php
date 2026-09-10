@@ -14,10 +14,13 @@ final class MediaRuleTester
      * @param array<int, mixed> $sourceRules
      * @return array{matched: bool, reason?: string, matchType?: string, ruleNumber?: int, captures?: array<string, string>, embedUrl?: string}
      */
-    public function test(string $url, array $sourceRules, string $embedUrl): array
+    public function test(string $url, array $sourceRules, string $embedUrl, array $captureDefaults = []): array
     {
         $url = trim($url);
         $embedUrl = trim($embedUrl);
+        $captureDefaults = MediaRuleDefinition::normalizeCaptureDefaults($captureDefaults);
+        $embedCaptures = MediaRuleDefinition::embedUrlCaptures($embedUrl);
+        $captureDefaults = array_intersect_key($captureDefaults, array_flip($embedCaptures));
 
         if ($url === '') {
             return $this->failure('empty_url');
@@ -27,7 +30,10 @@ final class MediaRuleTester
             return $this->failure('url_too_long');
         }
 
-        $requiredCaptures = MediaRuleDefinition::embedUrlCaptures($embedUrl);
+        $requiredCaptures = array_values(array_diff(
+            $embedCaptures,
+            array_keys($captureDefaults)
+        ));
 
         if ($requiredCaptures === []) {
             return $this->failure('missing_embed_capture');
@@ -96,7 +102,7 @@ final class MediaRuleTester
                 return $this->failure('empty_capture', $rule['number']);
             }
 
-            return $this->success('extract', $rule['number'], $captures, $embedUrl);
+            return $this->success('extract', $rule['number'], $captures, $embedUrl, $captureDefaults);
         }
 
         foreach ($redirectRules as $rule) {
@@ -116,7 +122,7 @@ final class MediaRuleTester
                 return $this->failure('redirect_failed', $rule['number'], 'redirect');
             }
 
-            return $this->success('redirect', $rule['number'], $captures, $embedUrl);
+            return $this->success('redirect', $rule['number'], $captures, $embedUrl, $captureDefaults);
         }
 
         return $this->failure('no_match');
@@ -149,8 +155,16 @@ final class MediaRuleTester
     }
 
     /** @param array<string, string> $captures */
-    private function success(string $matchType, int $ruleNumber, array $captures, string $embedUrl): array
+    private function success(
+        string $matchType,
+        int $ruleNumber,
+        array $captures,
+        string $embedUrl,
+        array $captureDefaults
+    ): array
     {
+        $captures = array_replace($captureDefaults, array_filter($captures, fn (string $value): bool => $value !== ''));
+
         return [
             'matched' => true,
             'matchType' => $matchType,

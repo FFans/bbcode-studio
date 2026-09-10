@@ -41,7 +41,15 @@ final class MediaRuleDefinition
         $fixedHeight = trim((string) ($data['aspect_ratio'] ?? '')) === '';
         self::addWrapperClasses($configurator, $siteTag, $tag, $fixedHeight);
         $siteIds = [$siteId];
-        $requiredCaptures = self::embedUrlCaptures((string) $data['embed_url']);
+        $captureDefaults = self::normalizeCaptureDefaults($data['capture_defaults'] ?? []);
+        $captureDefaults = array_intersect_key(
+            $captureDefaults,
+            array_flip(self::embedUrlCaptures((string) $data['embed_url']))
+        );
+        $requiredCaptures = array_values(array_diff(
+            self::embedUrlCaptures((string) $data['embed_url']),
+            array_keys($captureDefaults)
+        ));
         $redirectPatterns = self::patterns((string) ($data['redirect_pattern'] ?? ''));
         $sourceHosts = self::hostsFromPatterns((string) ($data['redirect_pattern'] ?? ''));
         $targetHosts = self::hostsFromPatterns((string) $data['extract_pattern']);
@@ -67,6 +75,10 @@ final class MediaRuleDefinition
         foreach (self::captures((string) $data['extract_pattern']) as $capture) {
             $attribute = $bbcodeTag->attributes->add($capture);
             $attribute->required = false;
+
+            if (isset($captureDefaults[$capture])) {
+                $attribute->defaultValue = $captureDefaults[$capture];
+            }
         }
 
         foreach (self::patterns((string) $data['extract_pattern']) as $pattern) {
@@ -205,6 +217,26 @@ final class MediaRuleDefinition
     }
 
     /** @return array<string, string> */
+    public static function normalizeCaptureDefaults(mixed $defaults): array
+    {
+        if (! is_array($defaults)) {
+            return [];
+        }
+
+        $normalized = [];
+
+        foreach ($defaults as $name => $value) {
+            $name = strtolower((string) $name);
+
+            if (preg_match('/^[a-z][a-z0-9_]*$/', $name) && is_scalar($value) && (string) $value !== '') {
+                $normalized[$name] = (string) $value;
+            }
+        }
+
+        return $normalized;
+    }
+
+    /** @return array<string, string> */
     public static function iframeAttributes(string $input): array
     {
         $attributes = [];
@@ -269,6 +301,16 @@ final class MediaRuleDefinition
     {
         $iframe = self::iframeAttributes((string) ($data['iframe_attributes'] ?? ''));
         $aspectRatio = trim((string) ($data['aspect_ratio'] ?? ''));
+        $attributes = [];
+
+        $captureDefaults = array_intersect_key(
+            self::normalizeCaptureDefaults($data['capture_defaults'] ?? []),
+            array_flip(self::embedUrlCaptures((string) $data['embed_url']))
+        );
+
+        foreach ($captureDefaults as $name => $value) {
+            $attributes[$name] = ['defaultValue' => $value, 'required' => false];
+        }
 
         if ($aspectRatio === '') {
             $iframe['width'] = '100%';
@@ -287,6 +329,7 @@ final class MediaRuleDefinition
         );
 
         return [
+            'attributes' => $attributes,
             'host' => self::hostsFromPatterns((string) $data['extract_pattern']),
             'extract' => self::patterns((string) $data['extract_pattern']),
             'iframe' => $iframe,
@@ -297,7 +340,10 @@ final class MediaRuleDefinition
     public static function redirectSiteConfig(array $data): array
     {
         $config = self::siteConfig($data);
-        $requiredCaptures = self::embedUrlCaptures((string) $data['embed_url']);
+        $requiredCaptures = array_values(array_diff(
+            self::embedUrlCaptures((string) $data['embed_url']),
+            array_keys($config['attributes'])
+        ));
         $config['host'] = self::hostsFromPatterns((string) ($data['redirect_pattern'] ?? ''));
         $config['extract'] = array_map(
             fn (string $pattern) => self::captureWholePattern($pattern, 'short_url'),

@@ -58,6 +58,7 @@ export interface RuleFormData {
   toolbarEnabled: boolean;
   extractPattern: string;
   sourceRules: MediaSourceRule[];
+  captureDefaults: Record<string, string>;
   embedUrl: string;
   iframeAttributes: string;
   aspectRatio: string;

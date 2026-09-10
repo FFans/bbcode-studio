@@ -44,6 +44,7 @@ class RuleValidator
             'toolbar_enabled' => (bool) ($attributes['toolbarEnabled'] ?? true),
             'extract_pattern' => $extractPattern,
             'redirect_pattern' => $redirectPattern,
+            'capture_defaults' => [],
             'embed_url' => trim((string) ($attributes['embedUrl'] ?? '')),
             'iframe_attributes' => trim((string) ($attributes['iframeAttributes'] ?? $existing?->iframe_attributes ?? '')),
             'aspect_ratio' => trim((string) ($attributes['aspectRatio'] ?? $existing?->aspect_ratio ?? '16 / 9')),
@@ -56,6 +57,7 @@ class RuleValidator
             $data['rule_type'] = $builtInDefaults['ruleType'];
             $data['name'] = $builtInDefaults['name'];
             $data['button_label'] = $builtInDefaults['buttonLabel'];
+            $data['capture_defaults'] = $builtInDefaults['captureDefaults'] ?? [];
         }
 
         $unique = 'unique:ffans_bbcode_studio_rules,tag'.($existing ? ','.$existing->id : '');
@@ -114,6 +116,8 @@ class RuleValidator
 
             $this->compileBbcode($data);
         }
+
+        unset($data['capture_defaults']);
 
         return $data;
     }

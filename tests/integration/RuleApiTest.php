@@ -624,10 +624,12 @@ class RuleApiTest extends TestCase
 
         $bbcodeHtml = $formatter->convert('[bilibili]https://www.bilibili.com/video/BV1xx411c7mD[/bilibili]');
         $plainLinkHtml = $formatter->convert('https://www.bilibili.com/video/BV1xx411c7mD');
+        $partHtml = $formatter->convert('https://www.bilibili.com/video/BV1Js411o76u?p=2');
 
         $this->assertStringContainsString('//player.bilibili.com/player.html?bvid=BV1xx411c7mD&amp;p=1&amp;autoplay=false', $bbcodeHtml);
         $this->assertStringContainsString('//player.bilibili.com/player.html?bvid=BV1xx411c7mD&amp;p=1&amp;autoplay=false', $plainLinkHtml);
-        $this->assertSame('//player.bilibili.com/player.html?bvid={id}&p=1&autoplay=false', BbcodeRule::query()->findOrFail(1)->embed_url);
+        $this->assertStringContainsString('//player.bilibili.com/player.html?bvid=BV1Js411o76u&amp;p=2&amp;autoplay=false', $partHtml);
+        $this->assertSame('//player.bilibili.com/player.html?bvid={id}&p={p}&autoplay=false', BbcodeRule::query()->findOrFail(1)->embed_url);
         $this->assertSame("scrolling='no' allowfullscreen", BbcodeRule::query()->findOrFail(1)->iframe_attributes);
         $this->assertStringContainsString('scrolling="no"', $bbcodeHtml);
         $this->assertStringContainsString('allowfullscreen', $bbcodeHtml);
@@ -635,6 +637,31 @@ class RuleApiTest extends TestCase
         $this->assertStringContainsString('BbcodeStudio-media-bilibili', $plainLinkHtml);
         $this->assertSame($plainLinkHtml, $bbcodeHtml);
         $this->assertStringContainsString('ffansbbcode', $formatter->getJs());
+    }
+
+    #[Test]
+    public function bilibili_part_parameter_migration_updates_only_the_previous_defaults(): void
+    {
+        $rule = BbcodeRule::query()->where('builtin_key', 'bilibili')->firstOrFail();
+        $oldPattern = '!bilibili\.com/video/(?<id>BV[a-zA-Z0-9]+)!';
+        $oldEmbedUrl = '//player.bilibili.com/player.html?bvid={id}&p=1&autoplay=false';
+        $newPattern = '!bilibili\.com/video/(?<id>BV[a-zA-Z0-9]+)(?:\?(?:[^#\s&]*&)*p=(?<p>[1-9]\d*)(?=[&#\s]|$))?!';
+        $newEmbedUrl = '//player.bilibili.com/player.html?bvid={id}&p={p}&autoplay=false';
+        $migration = require dirname(__DIR__, 2).'/migrations/2026_09_10_000000_support_bilibili_part_parameter.php';
+
+        $rule->forceFill(['extract_pattern' => $oldPattern, 'embed_url' => $oldEmbedUrl])->save();
+        $migration['up']($rule->getConnection()->getSchemaBuilder());
+        $rule->refresh();
+
+        $this->assertSame($newPattern, $rule->extract_pattern);
+        $this->assertSame($newEmbedUrl, $rule->embed_url);
+
+        $rule->forceFill(['extract_pattern' => '!custom-bilibili-pattern!', 'embed_url' => $oldEmbedUrl])->save();
+        $migration['up']($rule->getConnection()->getSchemaBuilder());
+        $rule->refresh();
+
+        $this->assertSame('!custom-bilibili-pattern!', $rule->extract_pattern);
+        $this->assertSame($oldEmbedUrl, $rule->embed_url);
     }
 
     #[Test]

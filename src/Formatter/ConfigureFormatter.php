@@ -2,6 +2,7 @@
 
 namespace FFans\BbcodeStudio\Formatter;
 
+use FFans\BbcodeStudio\BuiltInRuleDefaults;
 use FFans\BbcodeStudio\RuleRepository;
 use InvalidArgumentException;
 use s9e\TextFormatter\Configurator;
@@ -20,12 +21,14 @@ class ConfigureFormatter
         foreach ($this->rules->enabled() as $rule) {
             if ($rule->rule_type === 'media') {
                 $siteId = 'ffansbbcode'.$rule->id;
+                $builtInDefaults = BuiltInRuleDefaults::for($rule->builtin_key);
                 $definition = MediaRuleDefinition::configure($configurator, $rule->tag, $siteId, [
                     'extract_pattern' => $rule->extract_pattern,
                     'redirect_pattern' => $rule->redirect_pattern,
                     'embed_url' => $rule->embed_url,
                     'iframe_attributes' => $rule->iframe_attributes,
                     'aspect_ratio' => $rule->aspect_ratio,
+                    'capture_defaults' => $builtInDefaults['captureDefaults'] ?? [],
                 ]);
                 $mediaBbcodeTags[] = $definition['bbcodeTag'];
                 $mediaSiteIds = array_merge($mediaSiteIds, $definition['siteIds']);

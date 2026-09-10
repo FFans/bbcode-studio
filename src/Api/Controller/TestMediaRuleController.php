@@ -24,7 +24,8 @@ final class TestMediaRuleController extends AbstractRuleController implements Re
             'data' => $this->tester->test(
                 (string) ($attributes['url'] ?? ''),
                 $sourceRules,
-                (string) ($attributes['embedUrl'] ?? '')
+                (string) ($attributes['embedUrl'] ?? ''),
+                is_array($attributes['captureDefaults'] ?? null) ? $attributes['captureDefaults'] : []
             ),
         ]);
     }

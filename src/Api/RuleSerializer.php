@@ -11,6 +11,8 @@ class RuleSerializer
     /** @return array<string, mixed> */
     public function serialize(BbcodeRule $rule): array
     {
+        $builtInDefaults = BuiltInRuleDefaults::for($rule->builtin_key);
+
         return [
             'type' => 'bbcode-studio-rules',
             'id' => (string) $rule->id,
@@ -39,12 +41,13 @@ class RuleSerializer
                         MediaRuleDefinition::patterns((string) ($rule->redirect_pattern ?? ''))
                     )
                 ),
+                'captureDefaults' => $builtInDefaults['captureDefaults'] ?? [],
                 'embedUrl' => $rule->embed_url,
                 'iframeAttributes' => (string) ($rule->iframe_attributes ?? ''),
                 'aspectRatio' => $rule->aspect_ratio,
                 'sortOrder' => (int) $rule->sort_order,
                 'builtIn' => $rule->builtin_key !== null,
-                'defaultAttributes' => BuiltInRuleDefaults::for($rule->builtin_key),
+                'defaultAttributes' => $builtInDefaults,
                 'createdAt' => $rule->created_at?->toAtomString(),
                 'updatedAt' => $rule->updated_at?->toAtomString(),
             ],
