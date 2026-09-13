@@ -56,7 +56,7 @@ final class MediaRuleTesterTest extends TestCase
     public function it_applies_capture_defaults_and_preserves_explicit_values(): void
     {
         $tester = $this->tester(new MockHandler());
-        $pattern = '!bilibili\.com/video/(?<id>BV[a-zA-Z0-9]+)(?:\?(?:[^#\s&]*&)*p=(?<p>[1-9]\d*)(?=[&#\s]|$))?!';
+        $pattern = '!bilibili\.com/video/(?<id>BV[a-zA-Z0-9]+)/?(?:\?(?:[^#\s&]*&)*p=(?<p>[1-9]\d*)(?=[&#\s]|$))?!';
         $embedUrl = '//player.bilibili.com/player.html?bvid={id}&p={p}&autoplay=false';
 
         $default = $tester->test(
@@ -71,11 +71,19 @@ final class MediaRuleTesterTest extends TestCase
             $embedUrl,
             ['p' => '1']
         );
+        $trailingSlash = $tester->test(
+            'https://www.bilibili.com/video/BV1ujBYBNEPg/?spm_id_from=333.788.videopod.episodes&p=6',
+            [['type' => 'extract', 'pattern' => $pattern]],
+            $embedUrl,
+            ['p' => '1']
+        );
 
         $this->assertSame('1', $default['captures']['p']);
         $this->assertSame('//player.bilibili.com/player.html?bvid=BV1Js411o76u&p=1&autoplay=false', $default['embedUrl']);
         $this->assertSame('2', $explicit['captures']['p']);
         $this->assertSame('//player.bilibili.com/player.html?bvid=BV1Js411o76u&p=2&autoplay=false', $explicit['embedUrl']);
+        $this->assertSame('6', $trailingSlash['captures']['p']);
+        $this->assertSame('//player.bilibili.com/player.html?bvid=BV1ujBYBNEPg&p=6&autoplay=false', $trailingSlash['embedUrl']);
     }
 
     #[Test]
