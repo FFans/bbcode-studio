@@ -40,6 +40,14 @@ class RuleRepository
     /** @return list<BbcodeRule> */
     private function get(Builder $query): array
     {
+        // A missing-table error aborts an active PostgreSQL transaction even when caught.
+        // Check first in that case, while keeping the normal read path to one query.
+        if ($this->connection->getDriverName() === 'pgsql'
+            && $this->connection->transactionLevel() > 0
+            && ! $this->tableExists()) {
+            return [];
+        }
+
         try {
             return $query->orderByDesc('sort_order')->orderBy('id')->get()->all();
         } catch (QueryException $exception) {

@@ -19,24 +19,41 @@ class RuleRepositoryLifecycleTest extends TestCase
     public function api_formatter_and_assets_work_before_the_rules_table_exists(): void
     {
         $container = $this->app()->getContainer();
-        $this->database()->getSchemaBuilder()->rename('ffans_bbcode_studio_rules', 'audit_saved_rules');
-        $this->assertSame([], $container->make(RuleRepository::class)->all());
+        $schema = $this->database()->getSchemaBuilder();
+        $repository = $container->make(RuleRepository::class);
+        $ruleCount = count($repository->all());
+        $schema->rename('ffans_bbcode_studio_rules', 'audit_saved_rules');
 
-        $formatter = $container->make(Formatter::class);
-        $formatter->flush();
-        $this->assertStringContainsString('Plain content', $formatter->render($formatter->parse('Plain content')));
+        try {
+            foreach (['all', 'enabled', 'toolbarRules'] as $method) {
+                $this->assertSame([], $repository->{$method}());
+            }
 
-        $response = $this->send($this->request('GET', '/api'));
-        $this->assertSame(200, $response->getStatusCode());
-        $document = json_decode((string) $response->getBody(), true);
-        $this->assertSame([], $document['data']['attributes']['ffansBbcodeStudioToolbarRules']);
+            // Missing-table reads must leave the surrounding transaction usable.
+            $this->assertSame($ruleCount, $this->database()->table('audit_saved_rules')->count());
 
-        foreach (['forum', 'admin'] as $frontend) {
-            $assets = $container->make('flarum.assets.'.$frontend);
-            $assets->makeCss()->commit(true);
-            $this->assertNotEmpty($assets->getAssetsDir()->get($frontend.'.css'));
+            $formatter = $container->make(Formatter::class);
+            $formatter->flush();
+            $this->assertStringContainsString('Plain content', $formatter->render($formatter->parse('Plain content')));
+
+            $response = $this->send($this->request('GET', '/api'));
+            $this->assertSame(200, $response->getStatusCode());
+            $document = json_decode((string) $response->getBody(), true);
+            $this->assertSame([], $document['data']['attributes']['ffansBbcodeStudioToolbarRules']);
+
+            foreach (['forum', 'admin'] as $frontend) {
+                $assets = $container->make('flarum.assets.'.$frontend);
+                $assets->makeCss()->commit(true);
+                $this->assertNotEmpty($assets->getAssetsDir()->get($frontend.'.css'));
+            }
+
+            $this->assertSame(200, $this->send($this->request('GET', '/'))->getStatusCode());
+        } finally {
+            // MySQL/MariaDB implicitly commit RENAME TABLE, so teardown cannot undo it.
+            $schema->rename('audit_saved_rules', 'ffans_bbcode_studio_rules');
         }
 
-        $this->assertSame(200, $this->send($this->request('GET', '/'))->getStatusCode());
+        $this->assertCount($ruleCount, $repository->all());
+        $this->assertFalse($schema->hasTable('audit_saved_rules'));
     }
 }

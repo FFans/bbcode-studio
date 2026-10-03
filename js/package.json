@@ -10,6 +10,7 @@
     "check-typings": "tsc --noEmit --emitDeclarationOnly false"
   },
   "devDependencies": {
+    "@types/mithril": "^2.2.9",
     "@types/node": "18.19.39",
     "flarum-tsconfig": "^2.0.0",
     "flarum-webpack-config": "^3.0.0",

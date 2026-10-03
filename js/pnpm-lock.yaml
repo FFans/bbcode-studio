@@ -166,6 +166,9 @@ importers:
 
   .:
     devDependencies:
+      '@types/mithril':
+        specifier: ^2.2.9
+        version: 2.2.9
       '@types/node':
         specifier: 18.19.39
         version: 18.19.39
