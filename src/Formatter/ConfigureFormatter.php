@@ -15,6 +15,15 @@ class ConfigureFormatter
 
     public function __invoke(Configurator $configurator): void
     {
+        // Keep cached formatter configuration independent of the current reader's locale.
+        $configurator->rendering->parameters['L_BBCODE_STUDIO_SPOILER'] = 'Details';
+        if (isset($configurator->javascript)) {
+            $configurator->javascript->exports = array_values(array_unique([
+                ...$configurator->javascript->exports,
+                'setParameter',
+            ]));
+        }
+
         $mediaBbcodeTags = [];
         $mediaSiteIds = [];
 
@@ -24,7 +33,6 @@ class ConfigureFormatter
                 $builtInDefaults = BuiltInRuleDefaults::for($rule->builtin_key);
                 $definition = MediaRuleDefinition::configure($configurator, $rule->tag, $siteId, [
                     'extract_pattern' => $rule->extract_pattern,
-                    'redirect_pattern' => $rule->redirect_pattern,
                     'embed_url' => $rule->embed_url,
                     'iframe_attributes' => $rule->iframe_attributes,
                     'aspect_ratio' => $rule->aspect_ratio,

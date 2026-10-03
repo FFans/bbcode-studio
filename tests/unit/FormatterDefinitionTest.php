@@ -2,9 +2,9 @@
 
 namespace FFans\BbcodeStudio\Tests\unit;
 
+use FFans\BbcodeStudio\BuiltInRuleDefaults;
 use FFans\BbcodeStudio\Formatter\BbcodeRuleDefinition;
 use FFans\BbcodeStudio\Formatter\MediaRuleDefinition;
-use FFans\BbcodeStudio\Formatter\ShortLinkResolver;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -153,45 +153,34 @@ class FormatterDefinitionTest extends TestCase
     }
 
     #[Test]
-    public function short_links_are_resolved_on_the_server_for_tagged_and_plain_urls(): void
+    public function short_links_and_legacy_short_link_tags_do_not_generate_embeds(): void
     {
         $configurator = new Configurator();
         $configurator->rendering->setEngine('PHP');
         $configurator->rendering->getEngine()->cacheDir = sys_get_temp_dir();
         $definition = MediaRuleDefinition::configure($configurator, 'bilibili', 'ffansbbcodebilibili', [
             'extract_pattern' => '!bilibili\.com/video/(?<id>BV[a-zA-Z0-9]+)!',
-            'redirect_pattern' => '!b23\.tv/[a-zA-Z0-9]+!',
             'embed_url' => '//player.bilibili.com/player.html?bvid={id}',
             'iframe_attributes' => '',
             'aspect_ratio' => '16 / 9',
         ]);
         MediaRuleDefinition::isolateTaggedMedia($configurator, [$definition['bbcodeTag']], $definition['siteIds']);
-
         $components = $configurator->finalize();
-        $resolver = new class extends ShortLinkResolver {
-            public int $calls = 0;
 
-            public function __construct()
-            {
-            }
+        foreach (['https://b23.tv/PYEGMvk', '[bilibili]https://b23.tv/PYEGMvk[/bilibili]'] as $text) {
+            $html = $components['renderer']->render($components['parser']->parse($text));
+            $this->assertStringContainsString('https://b23.tv/PYEGMvk', $html);
+            $this->assertStringNotContainsString('<iframe', $html);
+        }
 
-            public function resolve(string $url, array $sourceHosts, array $targetHosts, array $directPatterns, array $requiredCaptures): ?array
-            {
-                $this->calls++;
-
-                return str_ends_with($url, 'b23.tv/PYEGMvk') ? ['id' => 'BV1xx411c7mD'] : null;
-            }
-        };
-        $components['parser']->registeredVars['bbcodeStudio.shortLinkResolver'] = $resolver;
-
-        $plainXml = $components['parser']->parse('https://b23.tv/PYEGMvk');
-        $plainLogs = $components['parser']->getLogger()->getLogs();
-        $taggedXml = $components['parser']->parse('[bilibili]https://b23.tv/PYEGMvk[/bilibili]');
-        $plainHtml = $components['renderer']->render($plainXml);
-        $taggedHtml = $components['renderer']->render($taggedXml);
-
-        $this->assertStringContainsString('bvid=BV1xx411c7mD', $plainHtml, $plainXml.json_encode($plainLogs));
-        $this->assertStringContainsString('bvid=BV1xx411c7mD', $taggedHtml, $taggedXml);
+        // Old stored XML keeps its URL text without a special compatibility template.
+        foreach ([
+            '<r><FFANSBBCODEBILIBILIREDIRECT id="BV1xx411c7mD" short_url="b23.tv/PYEGMvk">https://b23.tv/PYEGMvk</FFANSBBCODEBILIBILIREDIRECT></r>',
+        ] as $xml) {
+            $html = $components['renderer']->render($xml);
+            $this->assertStringContainsString('https://b23.tv/PYEGMvk', $html);
+            $this->assertStringNotContainsString('<iframe', $html);
+        }
     }
 
     #[Test]
@@ -328,25 +317,14 @@ XML
     #[Test]
     public function spoiler_bbcode_renders_a_collapsible_block_with_an_optional_title(): void
     {
+        $defaults = BuiltInRuleDefaults::for('spoiler');
         $configurator = new Configurator();
+        $configurator->rendering->parameters['L_BBCODE_STUDIO_SPOILER'] = 'Details';
         $configurator->rendering->setEngine('PHP');
         $configurator->rendering->getEngine()->cacheDir = sys_get_temp_dir();
         $configurator->BBCodes->addCustom(
-            '[spoiler title={SIMPLETEXT?}]{TEXT}[/spoiler]',
-            BbcodeRuleDefinition::template(
-                'spoiler',
-                <<<'XML'
-<details>
-  <summary>
-    <xsl:choose>
-      <xsl:when test="string-length(normalize-space(@title)) &gt; 0"><xsl:value-of select="@title"/></xsl:when>
-      <xsl:otherwise>Spoiler</xsl:otherwise>
-    </xsl:choose>
-  </summary>
-  <div class="BbcodeStudio-spoiler-content"><xsl:apply-templates/></div>
-</details>
-XML
-            )
+            $defaults['usage'],
+            BbcodeRuleDefinition::template('spoiler', $defaults['template'])
         );
 
         $components = $configurator->finalize();
@@ -354,11 +332,35 @@ XML
         $titledHtml = $components['renderer']->render($components['parser']->parse('[spoiler title=Ending]Hidden[/spoiler]'));
 
         $this->assertStringContainsString('<details', $defaultHtml);
-        $this->assertStringContainsString('<summary>Spoiler</summary>', $defaultHtml);
+        $this->assertStringContainsString('<summary>Details</summary>', $defaultHtml);
         $this->assertStringContainsString('BbcodeStudio-bbcode-spoiler', $defaultHtml);
         $this->assertStringContainsString('BbcodeStudio-spoiler-content', $defaultHtml);
         $this->assertStringContainsString('<summary>Ending</summary>', $titledHtml);
         $this->assertStringContainsString('Hidden', $titledHtml);
+
+        foreach ([
+            '[spoiler title=中文标题]Hidden[/spoiler]' => '中文标题',
+            '[spoiler title="剧透 提示：结局！🎉"]Hidden[/spoiler]' => '剧透 提示：结局！🎉',
+            '[spoiler title=""]Hidden[/spoiler]' => 'Details',
+            '[spoiler title="   "]Hidden[/spoiler]' => 'Details',
+            '[spoiler title="<script>alert(1)</script> & 中文"]Hidden[/spoiler]' => '&lt;script&gt;alert(1)&lt;/script&gt; &amp; 中文',
+        ] as $input => $title) {
+            $html = $components['renderer']->render($components['parser']->parse($input));
+
+            $this->assertStringContainsString('<summary>'.$title.'</summary>', $html, $input);
+            $this->assertStringContainsString('Hidden', $html);
+            $this->assertStringNotContainsString('<script>', $html);
+        }
+
+        $components['renderer']->setParameter('L_BBCODE_STUDIO_SPOILER', '剧透 <提示> & 内容');
+        $this->assertStringContainsString(
+            '<summary>剧透 &lt;提示&gt; &amp; 内容</summary>',
+            $components['renderer']->render($components['parser']->parse('[spoiler]Hidden[/spoiler]'))
+        );
+        $this->assertStringContainsString(
+            '<summary>自定义标题</summary>',
+            $components['renderer']->render($components['parser']->parse('[spoiler title=自定义标题]Hidden[/spoiler]'))
+        );
     }
 
     #[Test]

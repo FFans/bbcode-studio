@@ -17,5 +17,16 @@
     "typescript": "^4.9.5",
     "webpack": "^5.104.1",
     "webpack-cli": "^4.10.0"
-  }
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "26.8.1"
+    },
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.8.1"
+    }
+  },
+  "packageManager": "pnpm@12.8.1"
 }

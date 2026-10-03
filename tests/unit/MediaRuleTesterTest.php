@@ -3,13 +3,6 @@
 namespace FFans\BbcodeStudio\Tests\unit;
 
 use FFans\BbcodeStudio\Formatter\MediaRuleTester;
-use FFans\BbcodeStudio\Formatter\ShortLinkResolver;
-use GuzzleHttp\Client;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Psr7\Response;
-use Illuminate\Cache\ArrayStore;
-use Illuminate\Cache\Repository;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -18,7 +11,7 @@ final class MediaRuleTesterTest extends TestCase
     #[Test]
     public function it_tests_direct_urls_with_named_captures(): void
     {
-        $tester = $this->tester(new MockHandler());
+        $tester = new MediaRuleTester();
 
         $this->assertSame([
             'matched' => true,
@@ -36,7 +29,7 @@ final class MediaRuleTesterTest extends TestCase
     #[Test]
     public function it_reports_the_invalid_rule_before_a_matching_rule(): void
     {
-        $tester = $this->tester(new MockHandler());
+        $tester = new MediaRuleTester();
 
         $this->assertSame([
             'matched' => false,
@@ -55,7 +48,7 @@ final class MediaRuleTesterTest extends TestCase
     #[Test]
     public function it_applies_capture_defaults_and_preserves_explicit_values(): void
     {
-        $tester = $this->tester(new MockHandler());
+        $tester = new MediaRuleTester();
         $pattern = '!bilibili\.com/video/(?<id>BV[a-zA-Z0-9]+)/?(?:\?(?:[^#\s&]*&)*p=(?<p>[1-9]\d*)(?=[&#\s]|$))?!';
         $embedUrl = '//player.bilibili.com/player.html?bvid={id}&p={p}&autoplay=false';
 
@@ -87,34 +80,27 @@ final class MediaRuleTesterTest extends TestCase
     }
 
     #[Test]
-    public function it_resolves_matching_short_urls(): void
+    public function short_urls_do_not_match_direct_rules(): void
     {
-        $tester = $this->tester(new MockHandler([
-            new Response(302, ['Location' => 'https://video.example.com/watch/abc123']),
-        ]));
+        $tester = new MediaRuleTester();
+        $this->assertSame(['matched' => false, 'reason' => 'no_match'], $tester->test(
+            'https://b23.tv/PYEGMvk',
+            [['type' => 'extract', 'pattern' => '!bilibili\.com/video/(?<id>BV[a-zA-Z0-9]+)!']],
+            '//player.bilibili.com/player.html?bvid={id}'
+        ));
+    }
 
-        $this->assertSame([
-            'matched' => true,
-            'matchType' => 'redirect',
-            'ruleNumber' => 2,
-            'captures' => ['id' => 'abc123'],
-            'embedUrl' => 'https://player.example.com/embed/abc123',
-        ], $tester->test(
-            'https://short.example.com/a1',
+    #[Test]
+    public function legacy_redirect_rules_are_rejected_even_after_a_matching_direct_rule(): void
+    {
+        $tester = new MediaRuleTester();
+        $this->assertSame(['matched' => false, 'reason' => 'invalid_pattern', 'ruleNumber' => 2], $tester->test(
+            'https://video.example.com/watch/abc123',
             [
                 ['type' => 'extract', 'pattern' => '!video\.example\.com/watch/(?<id>[a-z0-9]+)!'],
                 ['type' => 'redirect', 'pattern' => '!short\.example\.com/[a-z0-9]+!'],
             ],
             'https://player.example.com/embed/{id}'
-        ));
-    }
-
-    private function tester(MockHandler $handler): MediaRuleTester
-    {
-        return new MediaRuleTester(new ShortLinkResolver(
-            new Repository(new ArrayStore()),
-            new Client(['handler' => HandlerStack::create($handler)]),
-            fn (string $host): bool => true
         ));
     }
 }

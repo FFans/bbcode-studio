@@ -52,17 +52,12 @@ export function usageAttributes(usage: string): UsageAttribute[] {
   return attributes;
 }
 
-export function openingTag(
-  tag: string,
-  attributes: ExampleAttributes,
-): { value: string; emptyValueOffset: number | null } {
+export function openingTag(tag: string, attributes: ExampleAttributes): { value: string } {
   let value = `[${tag}`;
-  let emptyValueOffset: number | null = null;
 
   Object.entries(attributes).forEach(([name, attributeValue]) => {
     if (attributeValue === null) {
       value += ` ${name}=`;
-      emptyValueOffset ??= value.length;
       return;
     }
 
@@ -71,7 +66,7 @@ export function openingTag(
 
   value += ']';
 
-  return { value, emptyValueOffset };
+  return { value };
 }
 
 function escapeAttributeValue(value: string): string {

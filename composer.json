@@ -72,6 +72,9 @@
                 "backgroundColor": "#6f42c1",
                 "color": "#ffffff"
             }
+        },
+        "volta": {
+            "php": "8.3.33"
         }
     },
     "minimum-stability": "beta",

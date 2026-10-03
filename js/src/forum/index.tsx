@@ -7,10 +7,23 @@ import type ItemList from 'flarum/common/utils/ItemList';
 import type EditorDriverInterface from 'flarum/common/utils/EditorDriverInterface';
 import type { ToolbarRule } from '../common/types';
 import { openingTag } from '../common/bbcodeUsage';
+import extractText from 'flarum/common/utils/extractText';
+
+declare const s9e: {
+  TextFormatter: { setParameter?: (name: string, value: string) => void };
+};
 
 export const extend: unknown[] = [];
 
 app.initializers.add('ffans-bbcode-studio', () => {
+  // Older cached formatter assets may not yet export setParameter.
+  if (typeof s9e !== 'undefined') {
+    s9e.TextFormatter.setParameter?.(
+      'L_BBCODE_STUDIO_SPOILER',
+      extractText(app.translator.trans('ffans-bbcode-studio.forum.spoiler.title')),
+    );
+  }
+
   (extendComponent as any)(
     'flarum/common/components/TextEditor',
     'toolbarItems',
@@ -46,9 +59,6 @@ function insertRule(editorComponent: TextEditor, rule: ToolbarRule) {
 
   editor.insertBetween(start, end, `${open.value}${content}${close}`, false);
 
-  // if (open.emptyValueOffset !== null) {
-  //   editor.moveCursorTo(start + open.emptyValueOffset);
-  // } else
   if (!selection) {
     editor.moveCursorTo(start + open.value.length);
   }

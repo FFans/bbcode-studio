@@ -13,7 +13,7 @@ export interface ToolbarRule {
 }
 
 export type RuleType = 'bbcode' | 'media';
-export type MediaSourceRuleType = 'extract' | 'redirect';
+export type MediaSourceRuleType = 'extract';
 
 export interface MediaSourceRule {
   type: MediaSourceRuleType;
@@ -29,7 +29,6 @@ export type MediaTestFailureReason =
   | 'missing_pattern_capture'
   | 'missing_extract_rule'
   | 'empty_capture'
-  | 'redirect_failed'
   | 'no_match'
   | 'request_failed';
 

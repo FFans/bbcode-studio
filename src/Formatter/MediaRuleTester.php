@@ -2,14 +2,8 @@
 
 namespace FFans\BbcodeStudio\Formatter;
 
-use InvalidArgumentException;
-
 final class MediaRuleTester
 {
-    public function __construct(private ShortLinkResolver $shortLinkResolver)
-    {
-    }
-
     /**
      * @param array<int, mixed> $sourceRules
      * @return array{matched: bool, reason?: string, matchType?: string, ruleNumber?: int, captures?: array<string, string>, embedUrl?: string}
@@ -44,7 +38,6 @@ final class MediaRuleTester
         }
 
         $extractRules = [];
-        $redirectRules = [];
 
         foreach ($sourceRules as $index => $sourceRule) {
             $ruleNumber = $index + 1;
@@ -56,7 +49,7 @@ final class MediaRuleTester
             $type = (string) ($sourceRule['type'] ?? '');
             $pattern = trim((string) ($sourceRule['pattern'] ?? ''));
 
-            if (! in_array($type, ['extract', 'redirect'], true) || $pattern === '' || mb_strlen($pattern) > 2000) {
+            if ($type !== 'extract' || $pattern === '' || mb_strlen($pattern) > 2000) {
                 return $this->failure('invalid_pattern', $ruleNumber);
             }
 
@@ -68,23 +61,13 @@ final class MediaRuleTester
                 return $this->failure('invalid_pattern', $ruleNumber);
             }
 
-            if ($type === 'extract') {
-                $captures = MediaRuleDefinition::captures($pattern);
+            $captures = MediaRuleDefinition::captures($pattern);
 
-                if ($captures === [] || array_diff($requiredCaptures, $captures) !== []) {
-                    return $this->failure('missing_pattern_capture', $ruleNumber);
-                }
-
-                $extractRules[] = ['number' => $ruleNumber, 'pattern' => $pattern];
-            } else {
-                try {
-                    MediaRuleDefinition::captureWholePattern($pattern, 'short_url');
-                } catch (InvalidArgumentException) {
-                    return $this->failure('invalid_pattern', $ruleNumber);
-                }
-
-                $redirectRules[] = ['number' => $ruleNumber, 'pattern' => $pattern];
+            if ($captures === [] || array_diff($requiredCaptures, $captures) !== []) {
+                return $this->failure('missing_pattern_capture', $ruleNumber);
             }
+
+            $extractRules[] = ['number' => $ruleNumber, 'pattern' => $pattern];
         }
 
         if ($extractRules === []) {
@@ -102,27 +85,7 @@ final class MediaRuleTester
                 return $this->failure('empty_capture', $rule['number']);
             }
 
-            return $this->success('extract', $rule['number'], $captures, $embedUrl, $captureDefaults);
-        }
-
-        foreach ($redirectRules as $rule) {
-            if (preg_match($rule['pattern'], $url) !== 1) {
-                continue;
-            }
-
-            $captures = $this->shortLinkResolver->resolve(
-                $url,
-                MediaRuleDefinition::hostsFromPatterns(implode("\n", array_column($redirectRules, 'pattern'))),
-                MediaRuleDefinition::hostsFromPatterns(implode("\n", array_column($extractRules, 'pattern'))),
-                array_column($extractRules, 'pattern'),
-                $requiredCaptures
-            );
-
-            if ($captures === null) {
-                return $this->failure('redirect_failed', $rule['number'], 'redirect');
-            }
-
-            return $this->success('redirect', $rule['number'], $captures, $embedUrl, $captureDefaults);
+            return $this->success($rule['number'], $captures, $embedUrl, $captureDefaults);
         }
 
         return $this->failure('no_match');
@@ -156,7 +119,6 @@ final class MediaRuleTester
 
     /** @param array<string, string> $captures */
     private function success(
-        string $matchType,
         int $ruleNumber,
         array $captures,
         string $embedUrl,
@@ -167,7 +129,7 @@ final class MediaRuleTester
 
         return [
             'matched' => true,
-            'matchType' => $matchType,
+            'matchType' => 'extract',
             'ruleNumber' => $ruleNumber,
             'captures' => $captures,
             'embedUrl' => preg_replace_callback(
@@ -178,12 +140,11 @@ final class MediaRuleTester
         ];
     }
 
-    private function failure(string $reason, ?int $ruleNumber = null, ?string $matchType = null): array
+    private function failure(string $reason, ?int $ruleNumber = null): array
     {
         return array_filter([
             'matched' => false,
             'reason' => $reason,
-            'matchType' => $matchType,
             'ruleNumber' => $ruleNumber,
         ], static fn (mixed $value): bool => $value !== null);
     }

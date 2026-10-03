@@ -50,24 +50,6 @@ final class MediaRuleDefinition
             self::embedUrlCaptures((string) $data['embed_url']),
             array_keys($captureDefaults)
         ));
-        $redirectPatterns = self::patterns((string) ($data['redirect_pattern'] ?? ''));
-        $sourceHosts = self::hostsFromPatterns((string) ($data['redirect_pattern'] ?? ''));
-        $targetHosts = self::hostsFromPatterns((string) $data['extract_pattern']);
-
-        if ($redirectPatterns !== []) {
-            $redirectSiteId = $siteId.'redirect';
-            $redirectTag = $configurator->MediaEmbed->add($redirectSiteId, self::redirectSiteConfig($data));
-            self::addShortLinkFilter(
-                $redirectTag,
-                $sourceHosts,
-                $targetHosts,
-                self::patterns((string) $data['extract_pattern']),
-                $requiredCaptures
-            );
-            self::addWrapperClasses($configurator, $redirectTag, $tag, $fixedHeight);
-            $siteIds[] = $redirectSiteId;
-        }
-
         $bbcode = $configurator->BBCodes->addCustom(self::usage($tag), self::TEMPLATE, [
             'rules' => ['ignoreTags' => true],
         ]);
@@ -83,23 +65,6 @@ final class MediaRuleDefinition
 
         foreach (self::patterns((string) $data['extract_pattern']) as $pattern) {
             $bbcodeTag->attributePreprocessors->add('content', $pattern);
-        }
-
-        if ($redirectPatterns !== []) {
-            $attribute = $bbcodeTag->attributes->add('short_url');
-            $attribute->required = false;
-
-            foreach ($redirectPatterns as $pattern) {
-                $bbcodeTag->attributePreprocessors->add('content', self::captureWholePattern($pattern, 'short_url'));
-            }
-
-            self::addShortLinkFilter(
-                $bbcodeTag,
-                $sourceHosts,
-                $targetHosts,
-                self::patterns((string) $data['extract_pattern']),
-                $requiredCaptures
-            );
         }
 
         $matchTest = implode(' and ', array_map(fn (string $capture) => '@'.$capture, $requiredCaptures));
@@ -129,25 +94,6 @@ final class MediaRuleDefinition
         $tag->template = BbcodeRuleDefinition::addRootClasses((string) $tag->template, $classes);
         $configurator->templateNormalizer->normalizeTag($tag);
         $configurator->templateChecker->checkTag($tag);
-    }
-
-    /** @param list<string> $sourceHosts @param list<string> $targetHosts @param list<string> $patterns @param list<string> $requiredCaptures */
-    private static function addShortLinkFilter(
-        object $tag,
-        array $sourceHosts,
-        array $targetHosts,
-        array $patterns,
-        array $requiredCaptures
-    ): void {
-        $tag->filterChain->insert(1, ResolveShortLinkTag::class.'::resolve')
-            ->resetParameters()
-            ->addParameterByName('tag')
-            ->addParameterByName('bbcodeStudio.shortLinkResolver')
-            ->addParameterByValue($sourceHosts)
-            ->addParameterByValue($targetHosts)
-            ->addParameterByValue($patterns)
-            ->addParameterByValue($requiredCaptures)
-            ->setJS('returnTrue');
     }
 
     /** @param list<string> $bbcodeTags @param list<string> $siteIds */
@@ -186,26 +132,6 @@ final class MediaRuleDefinition
         preg_match_all('/\(\?[<\']([a-z][a-z0-9_]*)[>\']/', $patterns, $matches);
 
         return array_values(array_unique(array_map('strtolower', $matches[1] ?? [])));
-    }
-
-    public static function captureWholePattern(string $pattern, string $capture): string
-    {
-        $delimiter = substr($pattern, 0, 1);
-
-        if ($delimiter === '' || ctype_alnum($delimiter) || $delimiter === '\\' || ctype_space($delimiter)) {
-            throw new RuleConfigurationException('regexp_delimiter_required');
-        }
-
-        $closing = strrpos($pattern, $delimiter);
-
-        if ($closing === false || $closing === 0) {
-            throw new RuleConfigurationException('regexp_delimiter_unclosed');
-        }
-
-        $body = substr($pattern, 1, $closing - 1);
-        $modifiers = substr($pattern, $closing + 1);
-
-        return $delimiter.'(?<'.$capture.'>(?:'.$body.'))'.$delimiter.$modifiers;
     }
 
     /** @return list<string> */
@@ -334,27 +260,5 @@ final class MediaRuleDefinition
             'extract' => self::patterns((string) $data['extract_pattern']),
             'iframe' => $iframe,
         ];
-    }
-
-    /** @param array<string, mixed> $data */
-    public static function redirectSiteConfig(array $data): array
-    {
-        $config = self::siteConfig($data);
-        $requiredCaptures = array_values(array_diff(
-            self::embedUrlCaptures((string) $data['embed_url']),
-            array_keys($config['attributes'])
-        ));
-        $config['host'] = self::hostsFromPatterns((string) ($data['redirect_pattern'] ?? ''));
-        $config['extract'] = array_map(
-            fn (string $pattern) => self::captureWholePattern($pattern, 'short_url'),
-            self::patterns((string) ($data['redirect_pattern'] ?? ''))
-        );
-        $config['attributes'] = ['short_url' => ['required' => false]];
-
-        foreach ($requiredCaptures as $capture) {
-            $config['attributes'][$capture] = ['required' => true];
-        }
-
-        return $config;
     }
 }

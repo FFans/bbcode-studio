@@ -7,14 +7,13 @@ import Switch from 'flarum/common/components/Switch';
 import extractText from 'flarum/common/utils/extractText';
 import type {
   MediaSourceRule,
-  MediaSourceRuleType,
   MediaTestFailureReason,
   MediaTestResult,
   RuleFormData,
   RuleResource,
   RuleType,
 } from '../../common/types';
-import { usageAttributes, type UsageAttribute } from '../../common/bbcodeUsage';
+import { type UsageAttribute, usageAttributes } from '../../common/bbcodeUsage';
 
 interface RuleModalAttrs extends IFormModalAttrs {
   rule?: RuleResource;
@@ -126,6 +125,9 @@ export default class RuleModal extends FormModal<RuleModalAttrs> {
                   >
                     {app.translator.trans('ffans-bbcode-studio.admin.actions.add_source_rule')}
                   </Button>
+                </div>
+                <div className="BbcodeStudioSourceRules-help helpText">
+                  {app.translator.trans('ffans-bbcode-studio.admin.fields.source_rule_extract_help')}
                 </div>
                 {this.sourceRulesField()}
               </div>
@@ -333,7 +335,7 @@ export default class RuleModal extends FormModal<RuleModalAttrs> {
 
   sourceRuleRow(sourceRule: MediaSourceRule, index: number) {
     const hosts = this.hostsFromPattern(sourceRule.pattern);
-    const captures = sourceRule.type === 'extract' ? this.captureNamesFromPattern(sourceRule.pattern) : [];
+    const captures = this.captureNamesFromPattern(sourceRule.pattern);
 
     return (
       <div className="BbcodeStudioSourceRule" key={index}>
@@ -346,20 +348,24 @@ export default class RuleModal extends FormModal<RuleModalAttrs> {
           >
             {`#${index + 1}`}
           </span>
-          <select
-            className="FormControl"
-            value={sourceRule.type}
-            onchange={(event: Event) =>
-              this.changeSourceRuleType(index, (event.target as HTMLSelectElement).value as MediaSourceRuleType)
-            }
-          >
-            <option value="extract">
-              {app.translator.trans('ffans-bbcode-studio.admin.fields.source_rule_extract')}
-            </option>
-            <option value="redirect">
-              {app.translator.trans('ffans-bbcode-studio.admin.fields.source_rule_redirect')}
-            </option>
-          </select>
+          <div className="BbcodeStudioSourceRule-meta helpText">
+            {hosts.length > 0 && (
+              <span className="BbcodeStudioSourceRule-metaGroup">
+                <span>{app.translator.trans('ffans-bbcode-studio.admin.fields.source_hosts_prefix')}</span>
+                {hosts.map((host) => (
+                  <code key={host}>{host}</code>
+                ))}
+              </span>
+            )}
+            {captures.length > 0 && (
+              <span className="BbcodeStudioSourceRule-metaGroup">
+                <span>{app.translator.trans('ffans-bbcode-studio.admin.fields.capture_variables_prefix')}</span>
+                {captures.map((capture) => (
+                  <code key={capture}>{`{${capture}}`}</code>
+                ))}
+              </span>
+            )}
+          </div>
           <Button
             className="Button Button--icon Button--danger"
             type="button"
@@ -377,29 +383,6 @@ export default class RuleModal extends FormModal<RuleModalAttrs> {
             this.testResult = undefined;
           }}
         />
-        <div className="BbcodeStudioSourceRule-meta helpText">
-          <span className="BbcodeStudioSourceRule-help">
-            {sourceRule.type === 'extract'
-              ? app.translator.trans('ffans-bbcode-studio.admin.fields.source_rule_extract_help')
-              : app.translator.trans('ffans-bbcode-studio.admin.fields.source_rule_redirect_help')}
-          </span>
-          {hosts.length > 0 && (
-            <span className="BbcodeStudioSourceRule-metaGroup">
-              <span>{app.translator.trans('ffans-bbcode-studio.admin.fields.source_hosts_prefix')}</span>
-              {hosts.map((host) => (
-                <code key={host}>{host}</code>
-              ))}
-            </span>
-          )}
-          {captures.length > 0 && (
-            <span className="BbcodeStudioSourceRule-metaGroup">
-              <span>{app.translator.trans('ffans-bbcode-studio.admin.fields.capture_variables_prefix')}</span>
-              {captures.map((capture) => (
-                <code key={capture}>{`{${capture}}`}</code>
-              ))}
-            </span>
-          )}
-        </div>
       </div>
     );
   }
@@ -507,7 +490,6 @@ export default class RuleModal extends FormModal<RuleModalAttrs> {
           <i className="icon fas fa-circle-check" aria-hidden="true" />
           <strong>
             {app.translator.trans('ffans-bbcode-studio.admin.test.matched', {
-              type: app.translator.trans(`ffans-bbcode-studio.admin.fields.source_rule_${result.matchType}`),
               number: result.ruleNumber,
             })}
           </strong>
@@ -560,16 +542,6 @@ export default class RuleModal extends FormModal<RuleModalAttrs> {
       this.testLoading = false;
       m.redraw();
     }
-  }
-
-  detectedHosts(type: MediaSourceRuleType): string[] {
-    return [
-      ...new Set(
-        this.data.sourceRules
-          .filter((rule) => rule.type === type)
-          .flatMap((rule) => this.hostsFromPattern(rule.pattern)),
-      ),
-    ];
   }
 
   hostsFromPattern(pattern: string): string[] {
@@ -684,18 +656,12 @@ export default class RuleModal extends FormModal<RuleModalAttrs> {
   }
 
   removeSourceRule(index: number) {
-    const removing = this.data.sourceRules[index];
     this.data.sourceRules.splice(index, 1);
 
-    if (removing.type === 'extract' && !this.data.sourceRules.some((rule) => rule.type === 'extract')) {
+    if (this.data.sourceRules.length === 0) {
       this.data.sourceRules.unshift({ type: 'extract', pattern: DEFAULT_MEDIA_SOURCE_PATTERN });
     }
 
-    this.testResult = undefined;
-  }
-
-  changeSourceRuleType(index: number, type: MediaSourceRuleType) {
-    this.data.sourceRules[index].type = type;
     this.testResult = undefined;
   }
 

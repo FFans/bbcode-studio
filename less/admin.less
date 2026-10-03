@@ -225,8 +225,8 @@
   background: color-mix(in srgb, var(--control-bg) 25%, transparent);
 }
 
-.BbcodeStudioSourceRule-toolbar .FormControl {
-  flex: 1;
+.BbcodeStudioSourceRule-toolbar {
+  justify-content: space-between;
 }
 
 .BbcodeStudioSourceRule-number {
@@ -242,15 +242,22 @@
 }
 
 .BbcodeStudioSourceRule-meta {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
   align-items: flex-start;
   flex-wrap: wrap;
 }
 
-.BbcodeStudioSourceRule-help {
-  flex-basis: 100%;
+.BbcodeStudioSourceRules-help {
+  width: 100%;
+  margin: 0;
 }
 
 .BbcodeStudioSourceRule-metaGroup {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   display: flex;
   align-items: center;
   flex-wrap: wrap;

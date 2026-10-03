@@ -31,15 +31,9 @@ class RuleSerializer
                 'enabled' => (bool) $rule->enabled,
                 'toolbarEnabled' => (bool) $rule->toolbar_enabled,
                 'extractPattern' => $rule->extract_pattern,
-                'sourceRules' => array_merge(
-                    array_map(
-                        fn (string $pattern) => ['type' => 'extract', 'pattern' => $pattern],
-                        MediaRuleDefinition::patterns((string) $rule->extract_pattern)
-                    ),
-                    array_map(
-                        fn (string $pattern) => ['type' => 'redirect', 'pattern' => $pattern],
-                        MediaRuleDefinition::patterns((string) ($rule->redirect_pattern ?? ''))
-                    )
+                'sourceRules' => array_map(
+                    fn (string $pattern) => ['type' => 'extract', 'pattern' => $pattern],
+                    MediaRuleDefinition::patterns((string) $rule->extract_pattern)
                 ),
                 'captureDefaults' => $builtInDefaults['captureDefaults'] ?? [],
                 'embedUrl' => $rule->embed_url,

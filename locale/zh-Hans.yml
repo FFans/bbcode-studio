@@ -72,13 +72,10 @@ ffans-bbcode-studio:
       enabled_label: 启用模板
       toolbar_enabled_label: 添加编辑器按钮
       media_group: 媒体识别配置
-      source_rule_extract: 直接识别
-      source_rule_redirect: 短链识别
-      source_rule_number: "来源规则 #{number}"
-      source_hosts_prefix: 来源域名：
+      source_rule_number: "规则 #{number}"
+      source_hosts_prefix: 已识别域名：
       capture_variables_prefix: 变量：
-      source_rule_extract_help: 从完整 URL 中提取用于嵌入的内容，变量提取请使用 PCRE 正则捕获组。
-      source_rule_redirect_help: 适用于短链接。保存帖子时由服务器记录跳转后的 URL，再进行直接识别。
+      source_rule_extract_help: 使用 PCRE 命名捕获组直接从网址提取嵌入变量。
       embed_url_label: 嵌入地址
       embed_url_help: 请使用 HTTPS 或以 // 开头的 iframe 嵌入地址。点击插入变量：
       capture_values_empty: 尚未识别到变量
@@ -87,11 +84,11 @@ ffans-bbcode-studio:
       aspect_ratio_label: 宽高比
       aspect_ratio_help: 媒体播放器的响应式比例，例如 16 / 9；固定高度播放器可留空，并在 iframe 属性中设置 height。
       test_url_label: 测试
-      test_url_help: 使用 PHP PCRE 测试当前尚未保存的规则。仅在点击测试时由服务器解析。
+      test_url_help: 使用 PHP PCRE 测试当前尚未保存的规则。d
       sort_order_label: 排序值
-      sort_order_help: 用于排序编辑器中的自定义 BBCode 图标。
+      sort_order_help: 用于排序编辑器中的按钮。
     test:
-      matched: "已匹配{type}规则 #{number}"
+      matched: "已匹配规则 #{number}"
       embed_url: 嵌入地址
       empty_url: 请输入要测试的网址。
       url_too_long: 测试网址不能超过 2000 个字符。
@@ -101,8 +98,7 @@ ffans-bbcode-studio:
       missing_pattern_capture: "直接识别规则 #{number} 未提供嵌入地址使用的全部变量。"
       missing_extract_rule: 请至少添加一条直接识别规则。
       empty_capture: "规则 #{number} 已匹配，但必要的捕获值为空。"
-      redirect_failed: "短链规则 #{number} 已匹配，但服务器无法将其解析为受支持的完整网址。"
-      no_match: 该网址未匹配任何来源规则。
+      no_match: 该网址未匹配任何来源规则。如果使用了短链接，请打开后复制完整的目标网址。
       request_failed: 测试请求失败，请检查网络连接后重试。
   api:
     validation:
@@ -114,7 +110,8 @@ ffans-bbcode-studio:
       example_attribute_choice: 属性 {attribute} 的自动插入值必须是该属性声明的可选值之一。
       source_rules_array: 媒体来源规则必须是数组。
       source_rule_invalid: "媒体来源规则 #{number} 无效。"
-      source_rule_type: "媒体来源规则 #{number} 的类型无效。"
+      source_rule_type: "媒体来源规则 #{number} 仅支持直接识别。"
+      redirect_unsupported: 已不再支持短链跳转规则，请使用直接识别规则。
       fixed_height_required: "固定高度的媒体规则必须包含正整数高度，例如 height='86'。"
       aspect_ratio_positive: 宽高比的两个数值都必须大于零。
       embed_capture_required: 嵌入地址必须引用至少一个命名捕获变量。
@@ -122,8 +119,6 @@ ffans-bbcode-studio:
       extract_capture_required: "直接识别规则 #{number} 必须包含至少一个命名捕获组。"
       embed_capture_mismatch: 嵌入地址中的每个占位符都必须匹配每条直接识别规则中的命名捕获组。
       extract_regexp_invalid: "直接识别规则 #{number} 不是有效的正则表达式。"
-      redirect_hostname_required: "短链规则 #{number} 必须包含至少一个明确的域名。"
-      redirect_regexp_invalid: "短链规则 #{number} 不是有效的正则表达式。"
       embed_url_https: 嵌入地址必须使用 HTTPS 或以 // 开头。
       bbcode_definition_invalid: BBCode 用法或渲染模板无效。
       template_attributes_undeclared: "渲染模板引用了 BBCode 用法中未声明的属性：{attributes}。"
@@ -135,8 +130,6 @@ ffans-bbcode-studio:
       styles_close_scope: 自定义样式不能闭合自动生成的 class 作用域。
       styles_unclosed: 自定义样式包含未闭合的注释、引号或代码块。
       template_requires_element: 渲染模板必须输出至少一个 HTML 元素，才能应用自动生成的 class。
-      regexp_delimiter_required: 正则表达式必须使用分隔符。
-      regexp_delimiter_unclosed: 正则表达式的分隔符未闭合。
       iframe_attribute_format: "iframe 属性必须使用 name 或 name='value' 格式。"
       iframe_attribute_not_allowed: 不允许使用 iframe 属性“{attribute}”。
       iframe_attribute_repeated: iframe 属性“{attribute}”不能重复。
@@ -144,12 +137,14 @@ ffans-bbcode-studio:
       iframe_attribute_static_value: iframe 属性值必须是静态文本。
       iframe_attribute_quote_types: iframe 属性值不能同时包含两种引号。
   forum:
+    spoiler:
+      title: 详情
     toolbar:
       title: 插入 BBCode
       built_in:
         notice: 提示框
         kdb: 键盘按键
-        spoiler: 剧透
+        spoiler: 折叠内容
         bilibili: 哔哩哔哩
         youtube: YouTube
         vimeo: Vimeo

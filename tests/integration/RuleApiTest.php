@@ -3,8 +3,8 @@
 namespace FFans\BbcodeStudio\Tests\integration;
 
 use FFans\BbcodeStudio\BbcodeRule;
+use FFans\BbcodeStudio\BuiltInRuleDefaults;
 use FFans\BbcodeStudio\Formatter\BbcodeRuleDefinition;
-use FFans\BbcodeStudio\Formatter\ShortLinkResolver;
 use Flarum\Formatter\Formatter;
 use Flarum\Locale\LocaleManager;
 use Flarum\Locale\Translator;
@@ -26,8 +26,8 @@ class RuleApiTest extends TestCase
         // The integration bootstrap primes the core catalogue before enabling the current extension.
         // Register this extension's resources explicitly and vary the cache for these test processes.
         $locales = $this->app()->getContainer()->make(LocaleManager::class);
-        $locales->addTranslations('en', dirname(__DIR__, 2).'/locale/en.yml');
-        $locales->addTranslations('zh-Hans', dirname(__DIR__, 2).'/locale/zh-Hans.yml');
+        $locales->addTranslations('en', dirname(__DIR__, 2) . '/locale/en.yml');
+        $locales->addTranslations('zh-Hans', dirname(__DIR__, 2) . '/locale/zh-Hans.yml');
 
         $translator = $this->app()->getContainer()->make(Translator::class);
         $translator->setFallbackLocales(['en', 'en-FFANS']);
@@ -45,7 +45,7 @@ class RuleApiTest extends TestCase
         $response = $this->send($this->request('GET', '/api/ffans-bbcode-studio/rules', [
             'authenticatedAs' => 1,
         ]));
-        $document = json_decode((string) $response->getBody(), true);
+        $document = json_decode((string)$response->getBody(), true);
 
         $this->assertSame(200, $response->getStatusCode(), json_encode($document));
         $this->assertCount(8, $document['data']);
@@ -73,22 +73,21 @@ class RuleApiTest extends TestCase
             ['bbcode', 'media'],
             array_values(array_unique(array_column(array_column($document['data'], 'attributes'), 'ruleType')))
         );
-        $bilibili = current(array_filter($document['data'], fn (array $rule) => $rule['attributes']['tag'] === 'bilibili'));
+        $bilibili = current(array_filter($document['data'], fn(array $rule) => $rule['attributes']['tag'] === 'bilibili'));
         $this->assertSame(
-            ['extract', 'redirect'],
+            ['extract'],
             array_column($bilibili['attributes']['sourceRules'], 'type')
         );
-        $this->assertSame('!b23\.tv/[a-zA-Z0-9]+!', BbcodeRule::query()->where('tag', 'bilibili')->value('redirect_pattern'));
-        $youtube = current(array_filter($document['data'], fn (array $rule) => $rule['attributes']['tag'] === 'youtube'));
+        $youtube = current(array_filter($document['data'], fn(array $rule) => $rule['attributes']['tag'] === 'youtube'));
         $this->assertSame('https://youtu.be/A8LRxIANzQs', $youtube['attributes']['example']);
         $this->assertSame('https://youtu.be/A8LRxIANzQs', $youtube['attributes']['defaultAttributes']['example']);
-        $notice = current(array_filter($document['data'], fn (array $rule) => $rule['attributes']['tag'] === 'notice'));
-        $spoiler = current(array_filter($document['data'], fn (array $rule) => $rule['attributes']['tag'] === 'spoiler'));
+        $notice = current(array_filter($document['data'], fn(array $rule) => $rule['attributes']['tag'] === 'notice'));
+        $spoiler = current(array_filter($document['data'], fn(array $rule) => $rule['attributes']['tag'] === 'spoiler'));
         $this->assertSame(['color' => null], $notice['attributes']['exampleAttributes']);
         $this->assertSame(['title' => null], $spoiler['attributes']['exampleAttributes']);
 
         $forumResponse = $this->send($this->request('GET', '/api'));
-        $forumDocument = json_decode((string) $forumResponse->getBody(), true);
+        $forumDocument = json_decode((string)$forumResponse->getBody(), true);
         $this->assertSame([], $forumDocument['data']['attributes']['ffansBbcodeStudioToolbarRules']);
     }
 
@@ -120,7 +119,7 @@ class RuleApiTest extends TestCase
             ...$payload,
             'authenticatedAs' => 1,
         ]));
-        $document = json_decode((string) $response->getBody(), true);
+        $document = json_decode((string)$response->getBody(), true);
 
         $this->assertSame(200, $response->getStatusCode(), json_encode($document));
         $this->assertSame([
@@ -150,7 +149,7 @@ class RuleApiTest extends TestCase
         $response = $this->send($this->request('GET', '/api/ffans-bbcode-studio/rules', [
             'authenticatedAs' => 1,
         ]));
-        $rules = json_decode((string) $response->getBody(), true)['data'];
+        $rules = json_decode((string)$response->getBody(), true)['data'];
         $fields = [
             'name',
             'usage',
@@ -172,7 +171,7 @@ class RuleApiTest extends TestCase
                 $this->assertSame(
                     $attributes['defaultAttributes'][$field],
                     $attributes[$field],
-                    $attributes['tag'].'.'.$field
+                    $attributes['tag'] . '.' . $field
                 );
             }
         }
@@ -209,7 +208,7 @@ class RuleApiTest extends TestCase
                 ],
             ],
         ]));
-        $document = json_decode((string) $response->getBody(), true);
+        $document = json_decode((string)$response->getBody(), true);
 
         $this->assertSame(201, $response->getStatusCode(), json_encode($document));
         $this->assertSame('custom-notice', $document['data']['attributes']['tag']);
@@ -226,11 +225,11 @@ class RuleApiTest extends TestCase
         );
 
         $forumResponse = $this->send($this->request('GET', '/api'));
-        $forumDocument = json_decode((string) $forumResponse->getBody(), true);
+        $forumDocument = json_decode((string)$forumResponse->getBody(), true);
         $toolbarRules = $forumDocument['data']['attributes']['ffansBbcodeStudioToolbarRules'];
 
         $this->assertContains('custom-notice', array_column($toolbarRules, 'tag'));
-        $toolbarRule = current(array_filter($toolbarRules, fn (array $rule) => $rule['tag'] === 'custom-notice'));
+        $toolbarRule = current(array_filter($toolbarRules, fn(array $rule) => $rule['tag'] === 'custom-notice'));
         $this->assertSame(['tone' => 'warning', 'title' => null], $toolbarRule['exampleAttributes']);
 
         $formatter = $this->app()->getContainer()->make(Formatter::class);
@@ -252,10 +251,10 @@ class RuleApiTest extends TestCase
         $notice->save();
 
         $forumResponse = $this->send($this->request('GET', '/api'));
-        $forumDocument = json_decode((string) $forumResponse->getBody(), true);
+        $forumDocument = json_decode((string)$forumResponse->getBody(), true);
         $noticeToolbarRule = current(array_filter(
             $forumDocument['data']['attributes']['ffansBbcodeStudioToolbarRules'],
-            fn (array $rule) => $rule['tag'] === 'notice'
+            fn(array $rule) => $rule['tag'] === 'notice'
         ));
 
         $this->assertSame('ffans-bbcode-studio.forum.toolbar.built_in.notice', $noticeToolbarRule['buttonLabelTranslationKey']);
@@ -264,10 +263,10 @@ class RuleApiTest extends TestCase
         $notice->save();
 
         $forumResponse = $this->send($this->request('GET', '/api'));
-        $forumDocument = json_decode((string) $forumResponse->getBody(), true);
+        $forumDocument = json_decode((string)$forumResponse->getBody(), true);
         $noticeToolbarRule = current(array_filter(
             $forumDocument['data']['attributes']['ffansBbcodeStudioToolbarRules'],
-            fn (array $rule) => $rule['tag'] === 'notice'
+            fn(array $rule) => $rule['tag'] === 'notice'
         ));
 
         $this->assertSame('Custom notice tooltip', $noticeToolbarRule['buttonLabel']);
@@ -298,7 +297,7 @@ class RuleApiTest extends TestCase
             ],
         ]));
 
-        $document = json_decode((string) $response->getBody(), true);
+        $document = json_decode((string)$response->getBody(), true);
 
         $this->assertSame(422, $response->getStatusCode());
         $this->assertStringContainsString('declared choices', $document['errors'][0]['detail']);
@@ -327,7 +326,7 @@ class RuleApiTest extends TestCase
                 ],
             ],
         ]));
-        $document = json_decode((string) $response->getBody(), true);
+        $document = json_decode((string)$response->getBody(), true);
 
         $this->assertSame(422, $response->getStatusCode());
         $this->assertSame(
@@ -359,7 +358,7 @@ class RuleApiTest extends TestCase
                 ],
             ],
         ]));
-        $document = json_decode((string) $response->getBody(), true);
+        $document = json_decode((string)$response->getBody(), true);
 
         $this->assertSame(422, $response->getStatusCode());
         $this->assertSame(
@@ -394,7 +393,7 @@ class RuleApiTest extends TestCase
                 ],
             ],
         ]));
-        $document = json_decode((string) $response->getBody(), true);
+        $document = json_decode((string)$response->getBody(), true);
 
         $this->assertSame(422, $response->getStatusCode());
         $this->assertSame('自定义 BBCode 样式不支持 Less 导入和插件。', $document['errors'][0]['detail']);
@@ -408,12 +407,12 @@ class RuleApiTest extends TestCase
             'authenticatedAs' => 1,
         ]));
         $rules = array_values(array_filter(
-            json_decode((string) $listResponse->getBody(), true)['data'],
-            fn (array $rule) => $rule['attributes']['builtIn']
+            json_decode((string)$listResponse->getBody(), true)['data'],
+            fn(array $rule) => $rule['attributes']['builtIn']
         ));
 
         $this->assertCount(8, $rules);
-        $bilibili = current(array_filter($rules, fn (array $rule) => $rule['id'] === '1'));
+        $bilibili = current(array_filter($rules, fn(array $rule) => $rule['id'] === '1'));
         $bilibili['attributes']['name'] = 'Bilibili Video';
         $bilibili['attributes']['ruleType'] = 'bbcode';
         $bilibili['attributes']['description'] = 'Updated Bilibili rule';
@@ -429,7 +428,7 @@ class RuleApiTest extends TestCase
                 ],
             ],
         ]));
-        $updateDocument = json_decode((string) $updateResponse->getBody(), true);
+        $updateDocument = json_decode((string)$updateResponse->getBody(), true);
 
         $this->assertSame(200, $updateResponse->getStatusCode(), json_encode($updateDocument));
         $this->assertSame('Bilibili', $updateDocument['data']['attributes']['name']);
@@ -458,7 +457,7 @@ class RuleApiTest extends TestCase
                 ],
             ],
         ]));
-        $resetDocument = json_decode((string) $resetResponse->getBody(), true);
+        $resetDocument = json_decode((string)$resetResponse->getBody(), true);
 
         $this->assertSame(200, $resetResponse->getStatusCode(), json_encode($resetDocument));
         $this->assertSame('Bilibili', $resetDocument['data']['attributes']['name']);
@@ -483,7 +482,6 @@ class RuleApiTest extends TestCase
             'enabled' => true,
             'toolbar_enabled' => false,
             'extract_pattern' => '',
-            'redirect_pattern' => '',
             'embed_url' => '',
             'iframe_attributes' => '',
             'aspect_ratio' => '16 / 9',
@@ -491,7 +489,7 @@ class RuleApiTest extends TestCase
         ]);
         $rule->save();
 
-        $deleteResponse = $this->send($this->request('DELETE', '/api/ffans-bbcode-studio/rules/'.$rule->id, [
+        $deleteResponse = $this->send($this->request('DELETE', '/api/ffans-bbcode-studio/rules/' . $rule->id, [
             'authenticatedAs' => 1,
         ]));
 
@@ -506,14 +504,14 @@ class RuleApiTest extends TestCase
             'authenticatedAs' => 1,
         ]));
         $rules = array_values(array_filter(
-            json_decode((string) $listResponse->getBody(), true)['data'],
-            fn (array $rule) => $rule['attributes']['builtIn']
+            json_decode((string)$listResponse->getBody(), true)['data'],
+            fn(array $rule) => $rule['attributes']['builtIn']
         ));
 
         $this->assertCount(8, $rules);
 
         foreach ($rules as $rule) {
-            $response = $this->send($this->request('PATCH', '/api/ffans-bbcode-studio/rules/'.$rule['id'], [
+            $response = $this->send($this->request('PATCH', '/api/ffans-bbcode-studio/rules/' . $rule['id'], [
                 'authenticatedAs' => 1,
                 'json' => [
                     'data' => [
@@ -523,9 +521,9 @@ class RuleApiTest extends TestCase
                     ],
                 ],
             ]));
-            $document = json_decode((string) $response->getBody(), true);
+            $document = json_decode((string)$response->getBody(), true);
 
-            $this->assertSame(200, $response->getStatusCode(), $rule['attributes']['tag'].': '.json_encode($document));
+            $this->assertSame(200, $response->getStatusCode(), $rule['attributes']['tag'] . ': ' . json_encode($document));
             $this->assertSame($rule['attributes']['tag'], $document['data']['attributes']['tag']);
             $this->assertTrue($document['data']['attributes']['builtIn']);
         }
@@ -580,7 +578,7 @@ class RuleApiTest extends TestCase
             ],
         ]));
 
-        $document = json_decode((string) $response->getBody(), true);
+        $document = json_decode((string)$response->getBody(), true);
 
         $this->assertSame(422, $response->getStatusCode());
         $this->assertStringContainsString('@missing', $document['errors'][0]['detail']);
@@ -649,7 +647,7 @@ class RuleApiTest extends TestCase
         $oldEmbedUrl = '//player.bilibili.com/player.html?bvid={id}&p=1&autoplay=false';
         $newPattern = '!bilibili\.com/video/(?<id>BV[a-zA-Z0-9]+)(?:\?(?:[^#\s&]*&)*p=(?<p>[1-9]\d*)(?=[&#\s]|$))?!';
         $newEmbedUrl = '//player.bilibili.com/player.html?bvid={id}&p={p}&autoplay=false';
-        $migration = require dirname(__DIR__, 2).'/migrations/2026_09_10_000000_support_bilibili_part_parameter.php';
+        $migration = require dirname(__DIR__, 2) . '/migrations/2026_09_10_000000_support_bilibili_part_parameter.php';
 
         $rule->forceFill(['extract_pattern' => $oldPattern, 'embed_url' => $oldEmbedUrl])->save();
         $migration['up']($rule->getConnection()->getSchemaBuilder());
@@ -673,7 +671,7 @@ class RuleApiTest extends TestCase
         $betaTwoPattern = '!bilibili\.com/video/(?<id>BV[a-zA-Z0-9]+)(?:\?(?:[^#\s&]*&)*p=(?<p>[1-9]\d*)(?=[&#\s]|$))?!';
         $correctedPattern = '!bilibili\.com/video/(?<id>BV[a-zA-Z0-9]+)/?(?:\?(?:[^#\s&]*&)*p=(?<p>[1-9]\d*)(?=[&#\s]|$))?!';
         $embedUrl = '//player.bilibili.com/player.html?bvid={id}&p={p}&autoplay=false';
-        $migration = require dirname(__DIR__, 2).'/migrations/2026_09_11_000000_support_bilibili_trailing_slash.php';
+        $migration = require dirname(__DIR__, 2) . '/migrations/2026_09_11_000000_support_bilibili_trailing_slash.php';
 
         $rule->forceFill(['extract_pattern' => $betaTwoPattern, 'embed_url' => $embedUrl])->save();
         $migration['up']($rule->getConnection()->getSchemaBuilder());
@@ -691,27 +689,149 @@ class RuleApiTest extends TestCase
     }
 
     #[Test]
-    public function built_in_bilibili_short_links_are_resolved_while_formatting(): void
+    public function built_in_bilibili_does_not_embed_new_or_legacy_short_link_tags(): void
     {
         $this->enableBuiltInRule('bilibili');
-        $resolver = new class extends ShortLinkResolver {
-            public function __construct()
-            {
-            }
-
-            public function resolve(string $url, array $sourceHosts, array $targetHosts, array $directPatterns, array $requiredCaptures): ?array
-            {
-                return str_ends_with($url, 'b23.tv/PYEGMvk') ? ['id' => 'BV1xx411c7mD'] : null;
-            }
-        };
-        $this->app()->getContainer()->instance(ShortLinkResolver::class, $resolver);
         $formatter = $this->app()->getContainer()->make(Formatter::class);
-
         $plainHtml = $formatter->render($formatter->parse('https://b23.tv/PYEGMvk'));
         $taggedHtml = $formatter->render($formatter->parse('[bilibili]https://b23.tv/PYEGMvk[/bilibili]'));
+        $this->assertStringContainsString('href="https://b23.tv/PYEGMvk"', $plainHtml);
+        foreach ([$plainHtml, $taggedHtml] as $html) {
+            $this->assertStringContainsString('https://b23.tv/PYEGMvk', $html);
+            $this->assertStringNotContainsString('<iframe', $html);
+        }
 
-        $this->assertStringContainsString('bvid=BV1xx411c7mD', $plainHtml);
-        $this->assertStringContainsString('bvid=BV1xx411c7mD', $taggedHtml);
+        $rule = BbcodeRule::query()->where('builtin_key', 'bilibili')->firstOrFail();
+        $tag = 'FFANSBBCODE'.$rule->id.'REDIRECT';
+        $xml = '<r><'.$tag.' id="BV1xx411c7mD" p="2" short_url="b23.tv/PYEGMvk">https://b23.tv/PYEGMvk</'.$tag.'></r>';
+        $formatter->flush();
+        $html = $formatter->render($xml);
+        $this->assertStringContainsString('https://b23.tv/PYEGMvk', $html);
+        $this->assertStringNotContainsString('<iframe', $html);
+    }
+
+    #[Test]
+    public function built_in_spoiler_supports_unicode_titles(): void
+    {
+        $this->enableBuiltInRule('spoiler');
+        $formatter = $this->app()->getContainer()->make(Formatter::class);
+
+        $html = $formatter->convert('[spoiler title="中文标题 🎉"]Hidden content[/spoiler]');
+
+        $this->assertStringContainsString('<summary>中文标题 🎉</summary>', $html);
+        $this->assertStringContainsString('Hidden content', $html);
+        $this->assertStringContainsString('<summary>Details</summary>', $formatter->convert('[spoiler]Hidden[/spoiler]'));
+    }
+
+    #[Test]
+    public function spoiler_title_migration_preserves_customizations(): void
+    {
+        $rule = BbcodeRule::query()->where('builtin_key', 'spoiler')->firstOrFail();
+        $oldUsage = '[spoiler title={SIMPLETEXT?}]{TEXT}[/spoiler]';
+        $newUsage = '[spoiler title={TEXT?}]{TEXT}[/spoiler]';
+        $migration = require dirname(__DIR__, 2) . '/migrations/2026_10_03_000000_support_spoiler_unicode_title.php';
+        $schema = $rule->getConnection()->getSchemaBuilder();
+
+        $rule->forceFill([
+            'usage' => $oldUsage,
+            'template' => '<details><summary>Custom</summary><xsl:apply-templates/></details>',
+            'css_declarations' => 'color: red;',
+            'enabled' => true,
+        ])->save();
+        $before = $rule->refresh()->getAttributes();
+        $migration['up']($schema);
+        $rule->refresh();
+
+        $this->assertSame($newUsage, $rule->usage);
+        foreach ($before as $key => $value) {
+            if (!in_array($key, ['usage', 'updated_at'], true)) {
+                $this->assertSame($value, $rule->getAttributes()[$key], $key);
+            }
+        }
+
+        $migration['up']($schema);
+        $this->assertSame($newUsage, $rule->refresh()->usage);
+
+        $customUsage = '[spoiler title={TEXT?} lang={SIMPLETEXT?}]{TEXT}[/spoiler]';
+        $rule->forceFill(['usage' => $customUsage])->save();
+        $migration['up']($schema);
+        $this->assertSame($customUsage, $rule->refresh()->usage);
+
+        $rule->forceFill(['builtin_key' => null, 'usage' => $oldUsage])->save();
+        $migration['up']($schema);
+        $this->assertSame($oldUsage, $rule->refresh()->usage);
+    }
+
+    #[Test]
+    public function spoiler_default_title_follows_the_reader_locale_without_reparsing(): void
+    {
+        $rule = BbcodeRule::query()->where('builtin_key', 'spoiler')->firstOrFail();
+        $response = $this->send($this->request('PATCH', '/api/ffans-bbcode-studio/rules/' . $rule->id, [
+            'authenticatedAs' => 1,
+            'json' => ['data' => ['attributes' => [
+                ...BuiltInRuleDefaults::for('spoiler'),
+                'enabled' => true,
+            ]]],
+        ]));
+        $this->assertSame(200, $response->getStatusCode(), (string)$response->getBody());
+
+        $formatter = $this->app()->getContainer()->make(Formatter::class);
+        $translator = $this->app()->getContainer()->make(TranslatorInterface::class);
+        $xml = $formatter->parse('[spoiler]Hidden[/spoiler]');
+        $blankTitle = $formatter->parse('[spoiler title="   "]Hidden[/spoiler]');
+        $customTitle = $formatter->parse('[spoiler title="中文标题 🎉"]Hidden[/spoiler]');
+
+        foreach (['en', 'zh-Hans', 'en'] as $locale) {
+            $translator->setLocale($locale);
+            $title = $locale === 'zh-Hans' ? '详情' : 'Details';
+            $this->assertSame($title, $translator->trans('ffans-bbcode-studio.forum.spoiler.title'));
+            $this->assertStringContainsString('<summary>' . $title . '</summary>', $formatter->render($xml));
+            $this->assertStringContainsString('<summary>' . $title . '</summary>', $formatter->render($blankTitle));
+            $this->assertStringContainsString('<summary>中文标题 🎉</summary>', $formatter->render($customTitle));
+        }
+
+        $this->assertStringContainsString('setParameter', $formatter->getJs());
+        $this->assertStringContainsString('L_BBCODE_STUDIO_SPOILER', $formatter->getJs());
+    }
+
+    #[Test]
+    public function spoiler_translation_migration_only_updates_the_original_template(): void
+    {
+        $rule = BbcodeRule::query()->where('builtin_key', 'spoiler')->firstOrFail();
+        $newTemplate = BuiltInRuleDefaults::for('spoiler')['template'];
+        $oldTemplate = str_replace(
+            '<xsl:value-of select="$L_BBCODE_STUDIO_SPOILER"/>',
+            'Spoiler',
+            $newTemplate
+        );
+        $migration = require dirname(__DIR__, 2) . '/migrations/2026_10_03_000000_support_spoiler_unicode_title.php';
+        $schema = $rule->getConnection()->getSchemaBuilder();
+
+        foreach ([$oldTemplate, str_replace("\n", "\r\n", $oldTemplate)] as $template) {
+            $rule->forceFill(['template' => $template, 'css_declarations' => 'color: red;', 'enabled' => true])->save();
+            $before = $rule->refresh()->getAttributes();
+            $migration['up']($schema);
+            $rule->refresh();
+            $this->assertSame($newTemplate, str_replace("\r\n", "\n", $rule->template));
+            foreach ($before as $key => $value) {
+                if (!in_array($key, ['template', 'updated_at'], true)) {
+                    $this->assertSame($value, $rule->getAttributes()[$key], $key);
+                }
+            }
+            $after = $rule->getAttributes();
+            $migration['up']($schema);
+            $this->assertSame($after, $rule->refresh()->getAttributes());
+        }
+
+        foreach ([str_replace('Spoiler', '自定义默认标题', $oldTemplate), '<section>' . $oldTemplate . '</section>'] as $customTemplate) {
+            $rule->forceFill(['template' => $customTemplate])->save();
+            $migration['up']($schema);
+            $this->assertSame($customTemplate, $rule->refresh()->template);
+        }
+
+        $rule->forceFill(['builtin_key' => null, 'template' => $oldTemplate])->save();
+        $migration['up']($schema);
+        $this->assertSame($oldTemplate, $rule->refresh()->template);
     }
 
     #[Test]
@@ -738,10 +858,10 @@ class RuleApiTest extends TestCase
         $formatter = $this->app()->getContainer()->make(Formatter::class);
 
         foreach ([
-            'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-            'https://youtu.be/dQw4w9WgXcQ',
-            'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ',
-        ] as $url) {
+                     'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                     'https://youtu.be/dQw4w9WgXcQ',
+                     'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ',
+                 ] as $url) {
             $html = $formatter->convert($url);
 
             $this->assertStringContainsString('youtube-nocookie.com/embed/dQw4w9WgXcQ', $html, $url);
@@ -763,7 +883,7 @@ class RuleApiTest extends TestCase
         $this->assertSame('', BbcodeRule::query()->where('tag', 'spotify')->value('aspect_ratio'));
         $this->assertStringContainsString(
             "height='152'",
-            (string) BbcodeRule::query()->where('tag', 'spotify')->value('iframe_attributes')
+            (string)BbcodeRule::query()->where('tag', 'spotify')->value('iframe_attributes')
         );
     }
 
@@ -775,7 +895,7 @@ class RuleApiTest extends TestCase
         $url = 'https://music.163.com/#/song?fx-wechatnew=t1&fx-wxqd=&id=2073467158&playerUIModeId=1225003';
 
         $plainHtml = $formatter->convert($url);
-        $taggedHtml = $formatter->convert('[netease]'.$url.'[/netease]');
+        $taggedHtml = $formatter->convert('[netease]' . $url . '[/netease]');
 
         $this->assertSame($plainHtml, $taggedHtml);
         $this->assertStringContainsString(
@@ -812,7 +932,7 @@ class RuleApiTest extends TestCase
                 ],
             ],
         ]));
-        $document = json_decode((string) $response->getBody(), true);
+        $document = json_decode((string)$response->getBody(), true);
 
         $this->assertSame(201, $response->getStatusCode(), json_encode($document));
         $this->assertSame('', $document['data']['attributes']['aspectRatio']);
@@ -870,7 +990,6 @@ class RuleApiTest extends TestCase
                         'toolbarEnabled' => true,
                         'sourceRules' => [
                             ['type' => 'extract', 'pattern' => '!video\.example\.com/watch/(?<id>[a-z0-9]+)!'],
-                            ['type' => 'redirect', 'pattern' => '!short\.example\.com/[a-z0-9]+!'],
                         ],
                         'embedUrl' => 'https://player.example.com/embed/{id}',
                         'iframeAttributes' => " allowfullscreen   scrolling = \"yes\"   allow='autoplay; fullscreen' ",
@@ -879,7 +998,7 @@ class RuleApiTest extends TestCase
                 ],
             ],
         ]));
-        $document = json_decode((string) $response->getBody(), true);
+        $document = json_decode((string)$response->getBody(), true);
 
         $this->assertSame(201, $response->getStatusCode(), json_encode($document));
         $this->assertSame('media', $document['data']['attributes']['ruleType']);
@@ -888,11 +1007,7 @@ class RuleApiTest extends TestCase
         $this->assertSame('4 / 3', $document['data']['attributes']['aspectRatio']);
         $this->assertSame('4 / 3', BbcodeRule::query()->where('tag', 'examplevideo')->value('aspect_ratio'));
         $this->assertSame("allowfullscreen scrolling='yes' allow='autoplay; fullscreen'", $document['data']['attributes']['iframeAttributes']);
-        $this->assertSame(['extract', 'redirect'], array_column($document['data']['attributes']['sourceRules'], 'type'));
-        $this->assertSame(
-            '!short\.example\.com/[a-z0-9]+!',
-            BbcodeRule::query()->where('tag', 'examplevideo')->value('redirect_pattern')
-        );
+        $this->assertSame(['extract'], array_column($document['data']['attributes']['sourceRules'], 'type'));
 
         $formatter = $this->app()->getContainer()->make(Formatter::class);
         $taggedHtml = $formatter->convert('[examplevideo]https://video.example.com/watch/abc123[/examplevideo]');
@@ -957,6 +1072,41 @@ class RuleApiTest extends TestCase
         ]));
 
         $this->assertSame(422, $response->getStatusCode());
+    }
+
+    #[Test]
+    public function redirect_rule_configuration_is_rejected_for_creation_updates_and_testing(): void
+    {
+        $direct = ['type' => 'extract', 'pattern' => '!video\.example\.com/watch/(?<id>[a-z0-9]+)!'];
+        $redirect = ['type' => 'redirect', 'pattern' => '!short\.example\.com/[a-z0-9]+!'];
+        $attributes = [
+            'ruleType' => 'media', 'name' => 'Example video', 'tag' => 'examplevideo',
+            'sourceRules' => [$direct], 'embedUrl' => 'https://player.example.com/embed/{id}',
+        ];
+        $rule = BbcodeRule::query()->where('builtin_key', 'bilibili')->firstOrFail();
+        $before = $rule->getAttributes();
+
+        foreach ([['sourceRules' => [$direct, $redirect]], ['redirectPattern' => $redirect['pattern']]] as $legacy) {
+            foreach ([['POST', ''], ['PATCH', '/'.$rule->id]] as [$method, $suffix]) {
+                $response = $this->send($this->request($method, '/api/ffans-bbcode-studio/rules'.$suffix, [
+                    'authenticatedAs' => 1,
+                    'json' => ['data' => ['type' => 'bbcode-studio-rules', 'attributes' => [...$attributes, ...$legacy]]],
+                ]));
+                $this->assertSame(422, $response->getStatusCode());
+            }
+        }
+        $this->assertNull(BbcodeRule::query()->where('tag', 'examplevideo')->first());
+        $this->assertSame($before, $rule->refresh()->getAttributes());
+        $this->assertFalse($this->database()->getSchemaBuilder()->hasColumn('ffans_bbcode_studio_rules', 'redirect_pattern'));
+
+        $response = $this->send($this->request('POST', '/api/ffans-bbcode-studio/rules/test-media', [
+            'authenticatedAs' => 1,
+            'json' => ['data' => ['attributes' => [
+                ...$attributes, 'url' => 'https://short.example.com/a1', 'sourceRules' => [$direct, $redirect],
+            ]]],
+        ]));
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(['matched' => false, 'reason' => 'invalid_pattern', 'ruleNumber' => 2], json_decode((string) $response->getBody(), true)['data']);
     }
 
     private function enableBuiltInRule(string $tag): void

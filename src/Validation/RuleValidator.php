@@ -27,7 +27,7 @@ class RuleValidator
     /** @return array<string, mixed> */
     public function validate(array $attributes, ?BbcodeRule $existing = null): array
     {
-        [$extractPattern, $redirectPattern] = $this->sourcePatterns($attributes, $existing);
+        $extractPattern = $this->sourcePattern($attributes, $existing);
         $exampleAttributes = $attributes['exampleAttributes'] ?? $existing?->example_attributes ?? [];
         $data = [
             'rule_type' => strtolower(trim((string) ($attributes['ruleType'] ?? $existing?->rule_type ?? 'bbcode'))),
@@ -43,7 +43,6 @@ class RuleValidator
             'enabled' => (bool) ($attributes['enabled'] ?? true),
             'toolbar_enabled' => (bool) ($attributes['toolbarEnabled'] ?? true),
             'extract_pattern' => $extractPattern,
-            'redirect_pattern' => $redirectPattern,
             'capture_defaults' => [],
             'embed_url' => trim((string) ($attributes['embedUrl'] ?? '')),
             'iframe_attributes' => trim((string) ($attributes['iframeAttributes'] ?? $existing?->iframe_attributes ?? '')),
@@ -73,7 +72,6 @@ class RuleValidator
             'button_label' => ['nullable', 'string', 'max:100'],
             'example' => ['nullable', 'string', 'max:2000'],
             'extract_pattern' => ['required_if:rule_type,media', 'nullable', 'string', 'max:2000'],
-            'redirect_pattern' => ['nullable', 'string', 'max:2000'],
             'embed_url' => ['required_if:rule_type,media', 'nullable', 'string', 'max:2000'],
             'iframe_attributes' => ['nullable', 'string', 'max:2000'],
             'aspect_ratio' => ['nullable', 'regex:/^\d+(?:\.\d+)?\s*\/\s*\d+(?:\.\d+)?$/'],
@@ -98,7 +96,6 @@ class RuleValidator
         } else {
             $data['example_attributes'] = $this->normalizeExampleAttributes($exampleAttributes, $data['usage']);
             $data['extract_pattern'] = '';
-            $data['redirect_pattern'] = '';
             $data['embed_url'] = '';
             $data['iframe_attributes'] = '';
             $data['aspect_ratio'] = '16 / 9';
@@ -192,21 +189,21 @@ class RuleValidator
         return $normalized;
     }
 
-    /** @return array{string, string} */
-    private function sourcePatterns(array $attributes, ?BbcodeRule $existing): array
+    private function sourcePattern(array $attributes, ?BbcodeRule $existing): string
     {
+        if (isset($attributes['redirectPattern']) && $attributes['redirectPattern'] !== '') {
+            throw new ValidationException(['redirectPattern' => $this->message('redirect_unsupported')]);
+        }
+
         if (! array_key_exists('sourceRules', $attributes)) {
-            return [
-                trim((string) ($attributes['extractPattern'] ?? $existing?->extract_pattern ?? '')),
-                trim((string) ($attributes['redirectPattern'] ?? $existing?->redirect_pattern ?? '')),
-            ];
+            return trim((string) ($attributes['extractPattern'] ?? $existing?->extract_pattern ?? ''));
         }
 
         if (! is_array($attributes['sourceRules'])) {
             throw new ValidationException(['sourceRules' => $this->message('source_rules_array')]);
         }
 
-        $patterns = ['extract' => [], 'redirect' => []];
+        $patterns = [];
 
         foreach ($attributes['sourceRules'] as $index => $sourceRule) {
             if (! is_array($sourceRule)) {
@@ -218,18 +215,18 @@ class RuleValidator
             $type = (string) ($sourceRule['type'] ?? '');
             $pattern = trim((string) ($sourceRule['pattern'] ?? ''));
 
-            if (! array_key_exists($type, $patterns)) {
+            if ($type !== 'extract') {
                 throw new ValidationException([
                     'sourceRules' => $this->message('source_rule_type', ['number' => $index + 1]),
                 ]);
             }
 
             if ($pattern !== '') {
-                $patterns[$type][] = $pattern;
+                $patterns[] = $pattern;
             }
         }
 
-        return [implode("\n", $patterns['extract']), implode("\n", $patterns['redirect'])];
+        return implode("\n", $patterns);
     }
 
     private function normalizeIframeAttributes(string $attributes): string
@@ -301,30 +298,6 @@ class RuleValidator
                 throw new ValidationException([
                     'extractPattern' => $this->message('extract_regexp_invalid', ['number' => $index + 1]),
                 ]);
-            }
-        }
-
-        foreach (MediaRuleDefinition::patterns($data['redirect_pattern']) as $index => $pattern) {
-            if (MediaRuleDefinition::hostsFromPatterns($pattern) === []) {
-                throw new ValidationException([
-                    'sourceRules' => $this->message('redirect_hostname_required', ['number' => $index + 1]),
-                ]);
-            }
-
-            set_error_handler(static fn () => true);
-            $validRegexp = preg_match($pattern, '') !== false;
-            restore_error_handler();
-
-            if (! $validRegexp) {
-                throw new ValidationException([
-                    'sourceRules' => $this->message('redirect_regexp_invalid', ['number' => $index + 1]),
-                ]);
-            }
-
-            try {
-                MediaRuleDefinition::captureWholePattern($pattern, 'short_url');
-            } catch (RuleConfigurationException $exception) {
-                throw new ValidationException(['sourceRules' => $this->configurationMessage($exception)]);
             }
         }
 

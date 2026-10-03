@@ -9,7 +9,7 @@ use FFans\BbcodeStudio\Api\Controller\TestMediaRuleController;
 use FFans\BbcodeStudio\Api\Controller\UpdateRuleController;
 use FFans\BbcodeStudio\Api\ForumResourceFields;
 use FFans\BbcodeStudio\Formatter\ConfigureFormatter;
-use FFans\BbcodeStudio\Formatter\RegisterShortLinkResolver;
+use FFans\BbcodeStudio\Formatter\RenderSpoilerTitle;
 use FFans\BbcodeStudio\Frontend\StyleServiceProvider;
 
 return [
@@ -28,7 +28,7 @@ return [
 
     (new Extend\Formatter())
         ->configure(ConfigureFormatter::class)
-        ->parse(RegisterShortLinkResolver::class),
+        ->render(RenderSpoilerTitle::class),
 
     (new Extend\ApiResource(Resource\ForumResource::class))
         ->fields(ForumResourceFields::class),

@@ -50,7 +50,7 @@ p:last-child, ul:last-child, ol:last-child {
   background: #f0fdf4;
 }
 
-&[data-notice-color="balck"] {
+&[data-notice-color="black"] {
   border-color: #7b7b7b;
   background: #e3e3e3;
 }
@@ -85,16 +85,16 @@ LESS,
                 70
             ),
             'spoiler' => self::bbcode(
-                'Spoiler',
+                'Collapser',
                 'spoiler',
-                'Hide content inside a collapsible spoiler block.',
-                '[spoiler title={SIMPLETEXT?}]{TEXT}[/spoiler]',
+                'Display content in a collapsible block.',
+                '[spoiler title={TEXT?}]{TEXT}[/spoiler]',
                 <<<'XML'
 <details>
   <summary>
     <xsl:choose>
       <xsl:when test="string-length(normalize-space(@title)) &gt; 0"><xsl:value-of select="@title"/></xsl:when>
-      <xsl:otherwise>Spoiler</xsl:otherwise>
+      <xsl:otherwise><xsl:value-of select="$L_BBCODE_STUDIO_SPOILER"/></xsl:otherwise>
     </xsl:choose>
   </summary>
   <div class="BbcodeStudio-spoiler-content"><xsl:apply-templates/></div>
@@ -117,7 +117,7 @@ overflow: hidden;
 }
 LESS,
                 'fas fa-eye-slash',
-                'Spoiler',
+                'Collapser',
                 'Hidden content',
                 60
             ),
@@ -129,7 +129,6 @@ LESS,
                 'Bilibili',
                 'https://www.bilibili.com/video/BV1GJ411x7h7',
                 '!bilibili\.com/video/(?<id>BV[a-zA-Z0-9]+)/?(?:\?(?:[^#\s&]*&)*p=(?<p>[1-9]\d*)(?=[&#\s]|$))?!',
-                '!b23\.tv/[a-zA-Z0-9]+!',
                 '//player.bilibili.com/player.html?bvid={id}&p={p}&autoplay=false',
                 "scrolling='no' allowfullscreen",
                 '16 / 9',
@@ -144,7 +143,6 @@ LESS,
                 'YouTube',
                 'https://youtu.be/A8LRxIANzQs',
                 "!youtube\\.com/(?:watch.*?[?&]v=|(?:embed|live|shorts|v)/)(?<id>[-\\w]+)!\n!youtu\\.be/(?<id>[-\\w]+)!\n!youtube-nocookie\\.com/(?:embed|live|shorts|v)/(?<id>[-\\w]+)!",
-                '',
                 'https://www.youtube-nocookie.com/embed/{id}',
                 "allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share' referrerpolicy='strict-origin-when-cross-origin' allowfullscreen='true'",
                 '16 / 9',
@@ -158,7 +156,6 @@ LESS,
                 'Vimeo',
                 'https://vimeo.com/76979871',
                 "!vimeo\\.com/(?:channels/[a-zA-Z0-9_-]+/|groups/[a-zA-Z0-9_-]+/videos/|album/\\d+/video/|video/)?(?<id>\\d+)!\n!player\\.vimeo\\.com/video/(?<id>\\d+)!",
-                '',
                 'https://player.vimeo.com/video/{id}',
                 "allowfullscreen allow='autoplay; fullscreen; picture-in-picture'",
                 '16 / 9',
@@ -172,7 +169,6 @@ LESS,
                 'Spotify',
                 'https://open.spotify.com/track/11dFghVXANMlKmJXsNCbNl',
                 '!open\.spotify\.com/(?<type>track|album|playlist|artist|show|episode)/(?<id>[a-zA-Z0-9]+)!',
-                '',
                 'https://open.spotify.com/embed/{type}/{id}',
                 "allow='autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture' height='152'",
                 '',
@@ -186,7 +182,6 @@ LESS,
                 'NetEase Cloud Music',
                 'https://music.163.com/#/song?id=2073467158',
                 '!music\.163\.com/(?:#/)?song\?(?:[^#\s&]*&)*id=(?<id>\d+)!',
-                '',
                 '//music.163.com/outchain/player?type=2&id={id}&auto=1&height=66',
                 "scrolling='no' height='86'",
                 '',
@@ -246,7 +241,6 @@ LESS,
         string $buttonLabel,
         string $example,
         string $extractPattern,
-        string $redirectPattern,
         string $embedUrl,
         string $iframeAttributes,
         string $aspectRatio,
@@ -258,12 +252,6 @@ LESS,
         foreach (preg_split('/\r?\n/', $extractPattern) ?: [] as $pattern) {
             if ($pattern !== '') {
                 $sourceRules[] = ['type' => 'extract', 'pattern' => $pattern];
-            }
-        }
-
-        foreach (preg_split('/\r?\n/', $redirectPattern) ?: [] as $pattern) {
-            if ($pattern !== '') {
-                $sourceRules[] = ['type' => 'redirect', 'pattern' => $pattern];
             }
         }
 
