@@ -16,7 +16,7 @@ class StyleServiceProvider extends AbstractServiceProvider
         $this->container->resolving('flarum.assets.forum', function (Assets $assets, Container $container) {
             $assets->css(function (SourceCollector $sources) use ($container) {
                 $sources->addString(
-                    fn () => BbcodeRuleDefinition::stylesheet($container->make(RuleRepository::class)->enabled()),
+                    fn() => BbcodeRuleDefinition::stylesheet($container->make(RuleRepository::class)->enabled()),
                     'ffans_bbcode_studio_styles'
                 );
             });

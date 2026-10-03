@@ -47,15 +47,15 @@ class RuleRepository
             // Only a missing rules table is optional; other database failures must surface.
             $info = $exception->errorInfo ?? [];
             $missingTable = match ($this->connection->getDriverName()) {
-                'mysql', 'mariadb' => ($info[0] ?? null) === '42S02' && (int) ($info[1] ?? 0) === 1146,
+                'mysql', 'mariadb' => ($info[0] ?? null) === '42S02' && (int)($info[1] ?? 0) === 1146,
                 'pgsql' => ($info[0] ?? null) === '42P01',
                 'sqlite' => ($info[0] ?? null) === 'HY000'
-                    && (int) ($info[1] ?? 0) === 1
-                    && ($info[2] ?? '') === 'no such table: '.$this->connection->getTablePrefix().'ffans_bbcode_studio_rules',
+                    && (int)($info[1] ?? 0) === 1
+                    && ($info[2] ?? '') === 'no such table: ' . $this->connection->getTablePrefix() . 'ffans_bbcode_studio_rules',
                 default => false,
             };
 
-            if (! $missingTable) {
+            if (!$missingTable) {
                 throw $exception;
             }
 

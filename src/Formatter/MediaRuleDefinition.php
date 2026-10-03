@@ -23,12 +23,12 @@ final class MediaRuleDefinition
 
     public static function usage(string $tag): string
     {
-        return '['.$tag.']{URL}[/'.$tag.']';
+        return '[' . $tag . ']{URL}[/' . $tag . ']';
     }
 
     public static function className(string $tag): string
     {
-        return 'BbcodeStudio-media-'.$tag;
+        return 'BbcodeStudio-media-' . $tag;
     }
 
     /**
@@ -38,23 +38,23 @@ final class MediaRuleDefinition
     public static function configure(Configurator $configurator, string $tag, string $siteId, array $data): array
     {
         $siteTag = $configurator->MediaEmbed->add($siteId, self::siteConfig($data));
-        $fixedHeight = trim((string) ($data['aspect_ratio'] ?? '')) === '';
+        $fixedHeight = trim((string)($data['aspect_ratio'] ?? '')) === '';
         self::addWrapperClasses($configurator, $siteTag, $tag, $fixedHeight);
         $siteIds = [$siteId];
         $captureDefaults = self::normalizeCaptureDefaults($data['capture_defaults'] ?? []);
         $captureDefaults = array_intersect_key(
             $captureDefaults,
-            array_flip(self::embedUrlCaptures((string) $data['embed_url']))
+            array_flip(self::embedUrlCaptures((string)$data['embed_url']))
         );
         $requiredCaptures = array_values(array_diff(
-            self::embedUrlCaptures((string) $data['embed_url']),
+            self::embedUrlCaptures((string)$data['embed_url']),
             array_keys($captureDefaults)
         ));
         $bbcode = $configurator->BBCodes->addCustom(self::usage($tag), self::TEMPLATE, [
             'rules' => ['ignoreTags' => true],
         ]);
         $bbcodeTag = $configurator->tags[$bbcode->tagName];
-        foreach (self::captures((string) $data['extract_pattern']) as $capture) {
+        foreach (self::captures((string)$data['extract_pattern']) as $capture) {
             $attribute = $bbcodeTag->attributes->add($capture);
             $attribute->required = false;
 
@@ -63,17 +63,17 @@ final class MediaRuleDefinition
             }
         }
 
-        foreach (self::patterns((string) $data['extract_pattern']) as $pattern) {
+        foreach (self::patterns((string)$data['extract_pattern']) as $pattern) {
             $bbcodeTag->attributePreprocessors->add('content', $pattern);
         }
 
-        $matchTest = implode(' and ', array_map(fn (string $capture) => '@'.$capture, $requiredCaptures));
+        $matchTest = implode(' and ', array_map(fn(string $capture) => '@' . $capture, $requiredCaptures));
         $escapedTag = htmlspecialchars($tag, ENT_QUOTES, 'UTF-8');
-        $bbcodeTag->template = '<xsl:choose><xsl:when test="'.$matchTest.'">'
-            .(string) $siteTag->template
-            .'</xsl:when><xsl:otherwise><xsl:text>['.$escapedTag.']</xsl:text>'
-            .'<xsl:value-of select="@content"/><xsl:text>[/'.$escapedTag.']</xsl:text>'
-            .'</xsl:otherwise></xsl:choose>';
+        $bbcodeTag->template = '<xsl:choose><xsl:when test="' . $matchTest . '">'
+            . (string)$siteTag->template
+            . '</xsl:when><xsl:otherwise><xsl:text>[' . $escapedTag . ']</xsl:text>'
+            . '<xsl:value-of select="@content"/><xsl:text>[/' . $escapedTag . ']</xsl:text>'
+            . '</xsl:otherwise></xsl:choose>';
         $configurator->templateNormalizer->normalizeTag($bbcodeTag);
         $configurator->templateChecker->checkTag($bbcodeTag);
 
@@ -88,10 +88,10 @@ final class MediaRuleDefinition
         ];
 
         if ($fixedHeight) {
-            $classes[] = self::WRAPPER_CLASS.'--fixed-height';
+            $classes[] = self::WRAPPER_CLASS . '--fixed-height';
         }
 
-        $tag->template = BbcodeRuleDefinition::addRootClasses((string) $tag->template, $classes);
+        $tag->template = BbcodeRuleDefinition::addRootClasses((string)$tag->template, $classes);
         $configurator->templateNormalizer->normalizeTag($tag);
         $configurator->templateChecker->checkTag($tag);
     }
@@ -145,17 +145,17 @@ final class MediaRuleDefinition
     /** @return array<string, string> */
     public static function normalizeCaptureDefaults(mixed $defaults): array
     {
-        if (! is_array($defaults)) {
+        if (!is_array($defaults)) {
             return [];
         }
 
         $normalized = [];
 
         foreach ($defaults as $name => $value) {
-            $name = strtolower((string) $name);
+            $name = strtolower((string)$name);
 
-            if (preg_match('/^[a-z][a-z0-9_]*$/', $name) && is_scalar($value) && (string) $value !== '') {
-                $normalized[$name] = (string) $value;
+            if (preg_match('/^[a-z][a-z0-9_]*$/', $name) && is_scalar($value) && (string)$value !== '') {
+                $normalized[$name] = (string)$value;
             }
         }
 
@@ -171,14 +171,14 @@ final class MediaRuleDefinition
         $pattern = '/\G\s*([a-z][a-z0-9-]*)(?:\s*=\s*(?:"([^"]*)"|\'([^\']*)\'))?\s*/i';
 
         while ($offset < $length) {
-            if (! preg_match($pattern, $input, $matches, PREG_UNMATCHED_AS_NULL, $offset)) {
+            if (!preg_match($pattern, $input, $matches, PREG_UNMATCHED_AS_NULL, $offset)) {
                 throw new RuleConfigurationException('iframe_attribute_format');
             }
 
             $name = strtolower($matches[1]);
             $hasValue = $matches[2] !== null || $matches[3] !== null;
 
-            if (! in_array($name, self::ALLOWED_IFRAME_ATTRIBUTES, true)) {
+            if (!in_array($name, self::ALLOWED_IFRAME_ATTRIBUTES, true)) {
                 throw new RuleConfigurationException('iframe_attribute_not_allowed', ['attribute' => $name]);
             }
 
@@ -186,7 +186,7 @@ final class MediaRuleDefinition
                 throw new RuleConfigurationException('iframe_attribute_repeated', ['attribute' => $name]);
             }
 
-            if (! in_array($name, self::BOOLEAN_IFRAME_ATTRIBUTES, true) && ! $hasValue) {
+            if (!in_array($name, self::BOOLEAN_IFRAME_ATTRIBUTES, true) && !$hasValue) {
                 throw new RuleConfigurationException('iframe_attribute_requires_value', ['attribute' => $name]);
             }
 
@@ -210,10 +210,10 @@ final class MediaRuleDefinition
         foreach (self::iframeAttributes(trim($input)) as $name => $value) {
             if (in_array($name, self::BOOLEAN_IFRAME_ATTRIBUTES, true) && $value === '') {
                 $formatted[] = $name;
-            } elseif (! str_contains($value, "'")) {
-                $formatted[] = $name."='".$value."'";
-            } elseif (! str_contains($value, '"')) {
-                $formatted[] = $name.'="'.$value.'"';
+            } elseif (!str_contains($value, "'")) {
+                $formatted[] = $name . "='" . $value . "'";
+            } elseif (!str_contains($value, '"')) {
+                $formatted[] = $name . '="' . $value . '"';
             } else {
                 throw new RuleConfigurationException('iframe_attribute_quote_types');
             }
@@ -225,13 +225,13 @@ final class MediaRuleDefinition
     /** @param array<string, mixed> $data */
     public static function siteConfig(array $data): array
     {
-        $iframe = self::iframeAttributes((string) ($data['iframe_attributes'] ?? ''));
-        $aspectRatio = trim((string) ($data['aspect_ratio'] ?? ''));
+        $iframe = self::iframeAttributes((string)($data['iframe_attributes'] ?? ''));
+        $aspectRatio = trim((string)($data['aspect_ratio'] ?? ''));
         $attributes = [];
 
         $captureDefaults = array_intersect_key(
             self::normalizeCaptureDefaults($data['capture_defaults'] ?? []),
-            array_flip(self::embedUrlCaptures((string) $data['embed_url']))
+            array_flip(self::embedUrlCaptures((string)$data['embed_url']))
         );
 
         foreach ($captureDefaults as $name => $value) {
@@ -240,7 +240,7 @@ final class MediaRuleDefinition
 
         if ($aspectRatio === '') {
             $iframe['width'] = '100%';
-            $iframe['height'] = (int) $iframe['height'];
+            $iframe['height'] = (int)$iframe['height'];
         } else {
             [$ratioWidth, $ratioHeight] = array_map('floatval', preg_split('/\s*\/\s*/', $aspectRatio));
             $width = 900;
@@ -250,14 +250,14 @@ final class MediaRuleDefinition
 
         $iframe['src'] = preg_replace_callback(
             '/\{([a-z][a-z0-9_]*)\}/i',
-            fn (array $matches) => '{@'.strtolower($matches[1]).'}',
-            (string) $data['embed_url']
+            fn(array $matches) => '{@' . strtolower($matches[1]) . '}',
+            (string)$data['embed_url']
         );
 
         return [
             'attributes' => $attributes,
-            'host' => self::hostsFromPatterns((string) $data['extract_pattern']),
-            'extract' => self::patterns((string) $data['extract_pattern']),
+            'host' => self::hostsFromPatterns((string)$data['extract_pattern']),
+            'extract' => self::patterns((string)$data['extract_pattern']),
             'iframe' => $iframe,
         ];
     }

@@ -53,7 +53,7 @@ final class BbcodeUsageInspector
             if ($type === 'CHOICE') {
                 $choices = array_values(array_filter(
                     array_map('trim', explode(',', $arguments)),
-                    fn (string $choice): bool => $choice !== ''
+                    fn(string $choice): bool => $choice !== ''
                 ));
             }
 

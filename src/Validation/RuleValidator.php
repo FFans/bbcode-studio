@@ -19,9 +19,10 @@ use Throwable;
 class RuleValidator
 {
     public function __construct(
-        protected Factory $validator,
+        protected Factory             $validator,
         protected TranslatorInterface $translator,
-    ) {
+    )
+    {
     }
 
     /** @return array<string, mixed> */
@@ -30,24 +31,24 @@ class RuleValidator
         $extractPattern = $this->sourcePattern($attributes, $existing);
         $exampleAttributes = $attributes['exampleAttributes'] ?? $existing?->example_attributes ?? [];
         $data = [
-            'rule_type' => strtolower(trim((string) ($attributes['ruleType'] ?? $existing?->rule_type ?? 'bbcode'))),
-            'name' => trim((string) ($attributes['name'] ?? '')),
-            'tag' => strtolower(trim((string) ($attributes['tag'] ?? ''))),
-            'usage' => trim((string) ($attributes['usage'] ?? '')),
-            'template' => trim((string) ($attributes['template'] ?? '')),
-            'css_declarations' => trim((string) ($attributes['cssDeclarations'] ?? $existing?->css_declarations ?? '')),
-            'description' => trim((string) ($attributes['description'] ?? '')),
-            'icon' => trim((string) ($attributes['icon'] ?? 'fas fa-code')),
-            'button_label' => trim((string) ($attributes['buttonLabel'] ?? '')),
-            'example' => trim((string) ($attributes['example'] ?? '')),
-            'enabled' => (bool) ($attributes['enabled'] ?? true),
-            'toolbar_enabled' => (bool) ($attributes['toolbarEnabled'] ?? true),
+            'rule_type' => strtolower(trim((string)($attributes['ruleType'] ?? $existing?->rule_type ?? 'bbcode'))),
+            'name' => trim((string)($attributes['name'] ?? '')),
+            'tag' => strtolower(trim((string)($attributes['tag'] ?? ''))),
+            'usage' => trim((string)($attributes['usage'] ?? '')),
+            'template' => trim((string)($attributes['template'] ?? '')),
+            'css_declarations' => trim((string)($attributes['cssDeclarations'] ?? $existing?->css_declarations ?? '')),
+            'description' => trim((string)($attributes['description'] ?? '')),
+            'icon' => trim((string)($attributes['icon'] ?? 'fas fa-code')),
+            'button_label' => trim((string)($attributes['buttonLabel'] ?? '')),
+            'example' => trim((string)($attributes['example'] ?? '')),
+            'enabled' => (bool)($attributes['enabled'] ?? true),
+            'toolbar_enabled' => (bool)($attributes['toolbarEnabled'] ?? true),
             'extract_pattern' => $extractPattern,
             'capture_defaults' => [],
-            'embed_url' => trim((string) ($attributes['embedUrl'] ?? '')),
-            'iframe_attributes' => trim((string) ($attributes['iframeAttributes'] ?? $existing?->iframe_attributes ?? '')),
-            'aspect_ratio' => trim((string) ($attributes['aspectRatio'] ?? $existing?->aspect_ratio ?? '16 / 9')),
-            'sort_order' => (int) ($attributes['sortOrder'] ?? 0),
+            'embed_url' => trim((string)($attributes['embedUrl'] ?? '')),
+            'iframe_attributes' => trim((string)($attributes['iframeAttributes'] ?? $existing?->iframe_attributes ?? '')),
+            'aspect_ratio' => trim((string)($attributes['aspectRatio'] ?? $existing?->aspect_ratio ?? '16 / 9')),
+            'sort_order' => (int)($attributes['sortOrder'] ?? 0),
         ];
 
         $builtInDefaults = BuiltInRuleDefaults::for($existing?->builtin_key);
@@ -59,7 +60,7 @@ class RuleValidator
             $data['capture_defaults'] = $builtInDefaults['captureDefaults'] ?? [];
         }
 
-        $unique = 'unique:ffans_bbcode_studio_rules,tag'.($existing ? ','.$existing->id : '');
+        $unique = 'unique:ffans_bbcode_studio_rules,tag' . ($existing ? ',' . $existing->id : '');
         $validation = $this->validator->make($data, [
             'rule_type' => ['required', 'in:bbcode,media'],
             'name' => ['required', 'string', 'max:100'],
@@ -122,7 +123,7 @@ class RuleValidator
     /** @return array<string, string|null> */
     private function normalizeExampleAttributes(mixed $configured, string $usage): array
     {
-        if (! is_array($configured) || array_is_list($configured) && $configured !== []) {
+        if (!is_array($configured) || array_is_list($configured) && $configured !== []) {
             throw new ValidationException(['exampleAttributes' => $this->message('example_attributes_object')]);
         }
 
@@ -139,13 +140,13 @@ class RuleValidator
         $configuredByName = [];
 
         foreach ($configured as $name => $value) {
-            $configuredByName[strtolower((string) $name)] = $value;
+            $configuredByName[strtolower((string)$name)] = $value;
         }
 
         $normalized = [];
 
         foreach ($definitions as $name => $definition) {
-            if (! array_key_exists($name, $configuredByName)) {
+            if (!array_key_exists($name, $configuredByName)) {
                 continue;
             }
 
@@ -156,7 +157,7 @@ class RuleValidator
                 continue;
             }
 
-            if (! is_string($value)) {
+            if (!is_string($value)) {
                 throw new ValidationException(['exampleAttributes' => $this->message('example_attribute_text')]);
             }
 
@@ -171,7 +172,7 @@ class RuleValidator
             if ($choices !== []) {
                 $matches = array_values(array_filter(
                     $choices,
-                    fn (string $choice): bool => strcasecmp($choice, $value) === 0
+                    fn(string $choice): bool => strcasecmp($choice, $value) === 0
                 ));
 
                 if ($matches === []) {
@@ -195,25 +196,25 @@ class RuleValidator
             throw new ValidationException(['redirectPattern' => $this->message('redirect_unsupported')]);
         }
 
-        if (! array_key_exists('sourceRules', $attributes)) {
-            return trim((string) ($attributes['extractPattern'] ?? $existing?->extract_pattern ?? ''));
+        if (!array_key_exists('sourceRules', $attributes)) {
+            return trim((string)($attributes['extractPattern'] ?? $existing?->extract_pattern ?? ''));
         }
 
-        if (! is_array($attributes['sourceRules'])) {
+        if (!is_array($attributes['sourceRules'])) {
             throw new ValidationException(['sourceRules' => $this->message('source_rules_array')]);
         }
 
         $patterns = [];
 
         foreach ($attributes['sourceRules'] as $index => $sourceRule) {
-            if (! is_array($sourceRule)) {
+            if (!is_array($sourceRule)) {
                 throw new ValidationException([
                     'sourceRules' => $this->message('source_rule_invalid', ['number' => $index + 1]),
                 ]);
             }
 
-            $type = (string) ($sourceRule['type'] ?? '');
-            $pattern = trim((string) ($sourceRule['pattern'] ?? ''));
+            $type = (string)($sourceRule['type'] ?? '');
+            $pattern = trim((string)($sourceRule['pattern'] ?? ''));
 
             if ($type !== 'extract') {
                 throw new ValidationException([
@@ -253,7 +254,7 @@ class RuleValidator
         $iframeAttributes = MediaRuleDefinition::iframeAttributes($data['iframe_attributes']);
 
         if ($data['aspect_ratio'] === '') {
-            if (! isset($iframeAttributes['height']) || ! preg_match('/^[1-9]\d{0,3}$/', $iframeAttributes['height'])) {
+            if (!isset($iframeAttributes['height']) || !preg_match('/^[1-9]\d{0,3}$/', $iframeAttributes['height'])) {
                 throw new ValidationException(['iframeAttributes' => $this->message('fixed_height_required')]);
             }
         } else {
@@ -290,18 +291,18 @@ class RuleValidator
                 throw new ValidationException(['embedUrl' => $this->message('embed_capture_mismatch')]);
             }
 
-            set_error_handler(static fn () => true);
+            set_error_handler(static fn() => true);
             $validRegexp = preg_match($pattern, '') !== false;
             restore_error_handler();
 
-            if (! $validRegexp) {
+            if (!$validRegexp) {
                 throw new ValidationException([
                     'extractPattern' => $this->message('extract_regexp_invalid', ['number' => $index + 1]),
                 ]);
             }
         }
 
-        if (! str_starts_with($data['embed_url'], 'https://') && ! str_starts_with($data['embed_url'], '//')) {
+        if (!str_starts_with($data['embed_url'], 'https://') && !str_starts_with($data['embed_url'], '//')) {
             throw new ValidationException(['embedUrl' => $this->message('embed_url_https')]);
         }
     }
@@ -324,14 +325,14 @@ class RuleValidator
         $tag = $configurator->tags[$bbcode->tagName];
         $definedAttributes = array_keys(iterator_to_array($tag->attributes));
         $undefinedAttributes = array_values(array_diff(
-            $this->templateAttributeReferences((string) $tag->template),
+            $this->templateAttributeReferences((string)$tag->template),
             $definedAttributes
         ));
 
         if ($undefinedAttributes !== []) {
             throw new ValidationException([
                 'template' => $this->message('template_attributes_undeclared', [
-                    'attributes' => implode(', ', array_map(fn (string $attribute) => '@'.$attribute, $undefinedAttributes)),
+                    'attributes' => implode(', ', array_map(fn(string $attribute) => '@' . $attribute, $undefinedAttributes)),
                 ]),
             ]);
         }
@@ -369,7 +370,7 @@ class RuleValidator
     /** @param array<string, mixed> $parameters */
     private function message(string $key, array $parameters = []): string
     {
-        return $this->translator->trans('ffans-bbcode-studio.api.validation.'.$key, $parameters);
+        return $this->translator->trans('ffans-bbcode-studio.api.validation.' . $key, $parameters);
     }
 
     private function configurationMessage(RuleConfigurationException $exception): string

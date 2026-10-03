@@ -22,9 +22,9 @@ final class TestMediaRuleController extends AbstractRuleController implements Re
 
         return new JsonResponse([
             'data' => $this->tester->test(
-                (string) ($attributes['url'] ?? ''),
+                (string)($attributes['url'] ?? ''),
                 $sourceRules,
-                (string) ($attributes['embedUrl'] ?? ''),
+                (string)($attributes['embedUrl'] ?? ''),
                 is_array($attributes['captureDefaults'] ?? null) ? $attributes['captureDefaults'] : []
             ),
         ]);

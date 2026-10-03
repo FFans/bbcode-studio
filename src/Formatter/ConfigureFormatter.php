@@ -29,7 +29,7 @@ class ConfigureFormatter
 
         foreach ($this->rules->enabled() as $rule) {
             if ($rule->rule_type === 'media') {
-                $siteId = 'ffansbbcode'.$rule->id;
+                $siteId = 'ffansbbcode' . $rule->id;
                 $builtInDefaults = BuiltInRuleDefaults::for($rule->builtin_key);
                 $definition = MediaRuleDefinition::configure($configurator, $rule->tag, $siteId, [
                     'extract_pattern' => $rule->extract_pattern,

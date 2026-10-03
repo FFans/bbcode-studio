@@ -15,11 +15,12 @@ use Psr\Http\Server\RequestHandlerInterface;
 class CreateRuleController extends AbstractRuleController implements RequestHandlerInterface
 {
     public function __construct(
-        protected RuleValidator $validator,
-        protected RuleSerializer $serializer,
-        protected Formatter $formatter,
+        protected RuleValidator    $validator,
+        protected RuleSerializer   $serializer,
+        protected Formatter        $formatter,
         protected ForumStyleAssets $styleAssets,
-    ) {
+    )
+    {
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface

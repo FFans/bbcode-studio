@@ -12,7 +12,7 @@ final class BbcodeRuleDefinition
 
     public static function className(string $tag): string
     {
-        return 'BbcodeStudio-bbcode-'.$tag;
+        return 'BbcodeStudio-bbcode-' . $tag;
     }
 
     public static function normalizeStyles(string $styles): string
@@ -94,7 +94,7 @@ final class BbcodeRuleDefinition
     {
         $styles = trim($styles);
 
-        return $styles === '' ? '' : '.'.self::className($tag)." {\n".$styles."\n}\n";
+        return $styles === '' ? '' : '.' . self::className($tag) . " {\n" . $styles . "\n}\n";
     }
 
     /** @param iterable<\FFans\BbcodeStudio\BbcodeRule> $rules */
@@ -103,8 +103,8 @@ final class BbcodeRuleDefinition
         $stylesheet = '';
 
         foreach ($rules as $rule) {
-            if ($rule->rule_type === 'bbcode' && trim((string) $rule->css_declarations) !== '') {
-                $stylesheet .= self::scopedStyles($rule->tag, (string) $rule->css_declarations);
+            if ($rule->rule_type === 'bbcode' && trim((string)$rule->css_declarations) !== '') {
+                $stylesheet .= self::scopedStyles($rule->tag, (string)$rule->css_declarations);
             }
         }
 
@@ -126,8 +126,8 @@ final class BbcodeRuleDefinition
         $xpath = new DOMXPath($dom);
         $xslNamespace = TemplateLoader::XMLNS_XSL;
         $roots = $xpath->query(
-            '//*[namespace-uri() != "'.$xslNamespace.'"]'
-            .'[not(ancestor::*[namespace-uri() != "'.$xslNamespace.'"])]'
+            '//*[namespace-uri() != "' . $xslNamespace . '"]'
+            . '[not(ancestor::*[namespace-uri() != "' . $xslNamespace . '"])]'
         );
 
         if ($roots->length === 0) {

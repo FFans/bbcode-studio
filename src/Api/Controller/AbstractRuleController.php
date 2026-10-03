@@ -24,6 +24,6 @@ abstract class AbstractRuleController
 
     protected function routeId(ServerRequestInterface $request): int
     {
-        return (int) ($request->getQueryParams()['id'] ?? 0);
+        return (int)($request->getQueryParams()['id'] ?? 0);
     }
 }

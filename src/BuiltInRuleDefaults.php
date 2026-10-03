@@ -202,8 +202,9 @@ LESS,
         string $icon,
         string $buttonLabel,
         string $example,
-        int $sortOrder
-    ): array {
+        int    $sortOrder
+    ): array
+    {
         return [
             'ruleType' => 'bbcode',
             'name' => $name,
@@ -244,9 +245,10 @@ LESS,
         string $embedUrl,
         string $iframeAttributes,
         string $aspectRatio,
-        int $sortOrder,
-        array $captureDefaults = []
-    ): array {
+        int    $sortOrder,
+        array  $captureDefaults = []
+    ): array
+    {
         $sourceRules = [];
 
         foreach (preg_split('/\r?\n/', $extractPattern) ?: [] as $pattern) {
@@ -260,7 +262,7 @@ LESS,
             'name' => $name,
             'tag' => $tag,
             'description' => $description,
-            'usage' => '['.$tag.']{URL}[/'.$tag.']',
+            'usage' => '[' . $tag . ']{URL}[/' . $tag . ']',
             'template' => '<xsl:apply-templates/>',
             'cssDeclarations' => '',
             'icon' => $icon,

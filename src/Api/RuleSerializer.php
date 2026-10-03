@@ -15,7 +15,7 @@ class RuleSerializer
 
         return [
             'type' => 'bbcode-studio-rules',
-            'id' => (string) $rule->id,
+            'id' => (string)$rule->id,
             'attributes' => [
                 'ruleType' => $rule->rule_type,
                 'name' => $rule->name,
@@ -23,23 +23,23 @@ class RuleSerializer
                 'description' => $rule->description,
                 'usage' => $rule->usage,
                 'template' => $rule->template,
-                'cssDeclarations' => (string) ($rule->css_declarations ?? ''),
+                'cssDeclarations' => (string)($rule->css_declarations ?? ''),
                 'icon' => $rule->icon,
                 'buttonLabel' => $rule->button_label,
                 'example' => $rule->example,
                 'exampleAttributes' => $rule->example_attributes ?? [],
-                'enabled' => (bool) $rule->enabled,
-                'toolbarEnabled' => (bool) $rule->toolbar_enabled,
+                'enabled' => (bool)$rule->enabled,
+                'toolbarEnabled' => (bool)$rule->toolbar_enabled,
                 'extractPattern' => $rule->extract_pattern,
                 'sourceRules' => array_map(
-                    fn (string $pattern) => ['type' => 'extract', 'pattern' => $pattern],
-                    MediaRuleDefinition::patterns((string) $rule->extract_pattern)
+                    fn(string $pattern) => ['type' => 'extract', 'pattern' => $pattern],
+                    MediaRuleDefinition::patterns((string)$rule->extract_pattern)
                 ),
                 'captureDefaults' => $builtInDefaults['captureDefaults'] ?? [],
                 'embedUrl' => $rule->embed_url,
-                'iframeAttributes' => (string) ($rule->iframe_attributes ?? ''),
+                'iframeAttributes' => (string)($rule->iframe_attributes ?? ''),
                 'aspectRatio' => $rule->aspect_ratio,
-                'sortOrder' => (int) $rule->sort_order,
+                'sortOrder' => (int)$rule->sort_order,
                 'builtIn' => $rule->builtin_key !== null,
                 'defaultAttributes' => $builtInDefaults,
                 'createdAt' => $rule->created_at?->toAtomString(),

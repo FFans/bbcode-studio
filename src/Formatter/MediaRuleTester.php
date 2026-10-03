@@ -33,7 +33,7 @@ final class MediaRuleTester
             return $this->failure('missing_embed_capture');
         }
 
-        if (! str_starts_with($embedUrl, 'https://') && ! str_starts_with($embedUrl, '//')) {
+        if (!str_starts_with($embedUrl, 'https://') && !str_starts_with($embedUrl, '//')) {
             return $this->failure('invalid_embed_url');
         }
 
@@ -42,22 +42,22 @@ final class MediaRuleTester
         foreach ($sourceRules as $index => $sourceRule) {
             $ruleNumber = $index + 1;
 
-            if (! is_array($sourceRule)) {
+            if (!is_array($sourceRule)) {
                 return $this->failure('invalid_pattern', $ruleNumber);
             }
 
-            $type = (string) ($sourceRule['type'] ?? '');
-            $pattern = trim((string) ($sourceRule['pattern'] ?? ''));
+            $type = (string)($sourceRule['type'] ?? '');
+            $pattern = trim((string)($sourceRule['pattern'] ?? ''));
 
             if ($type !== 'extract' || $pattern === '' || mb_strlen($pattern) > 2000) {
                 return $this->failure('invalid_pattern', $ruleNumber);
             }
 
-            set_error_handler(static fn () => true);
+            set_error_handler(static fn() => true);
             $validRegexp = preg_match($pattern, '') !== false;
             restore_error_handler();
 
-            if (! $validRegexp || MediaRuleDefinition::hostsFromPatterns($pattern) === []) {
+            if (!$validRegexp || MediaRuleDefinition::hostsFromPatterns($pattern) === []) {
                 return $this->failure('invalid_pattern', $ruleNumber);
             }
 
@@ -109,7 +109,7 @@ final class MediaRuleTester
     private function missingRequiredCapture(array $captures, array $required): bool
     {
         foreach ($required as $name) {
-            if (! isset($captures[$name]) || $captures[$name] === '') {
+            if (!isset($captures[$name]) || $captures[$name] === '') {
                 return true;
             }
         }
@@ -119,13 +119,13 @@ final class MediaRuleTester
 
     /** @param array<string, string> $captures */
     private function success(
-        int $ruleNumber,
-        array $captures,
+        int    $ruleNumber,
+        array  $captures,
         string $embedUrl,
-        array $captureDefaults
+        array  $captureDefaults
     ): array
     {
-        $captures = array_replace($captureDefaults, array_filter($captures, fn (string $value): bool => $value !== ''));
+        $captures = array_replace($captureDefaults, array_filter($captures, fn(string $value): bool => $value !== ''));
 
         return [
             'matched' => true,
@@ -134,7 +134,7 @@ final class MediaRuleTester
             'captures' => $captures,
             'embedUrl' => preg_replace_callback(
                 '/\{([a-z][a-z0-9_]*)\}/i',
-                fn (array $matches) => $captures[strtolower($matches[1])] ?? $matches[0],
+                fn(array $matches) => $captures[strtolower($matches[1])] ?? $matches[0],
                 $embedUrl
             ),
         ];
@@ -146,6 +146,6 @@ final class MediaRuleTester
             'matched' => false,
             'reason' => $reason,
             'ruleNumber' => $ruleNumber,
-        ], static fn (mixed $value): bool => $value !== null);
+        ], static fn(mixed $value): bool => $value !== null);
     }
 }

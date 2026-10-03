@@ -15,10 +15,11 @@ use Psr\Http\Server\RequestHandlerInterface;
 class DeleteRuleController extends AbstractRuleController implements RequestHandlerInterface
 {
     public function __construct(
-        protected Formatter $formatter,
-        protected ForumStyleAssets $styleAssets,
+        protected Formatter           $formatter,
+        protected ForumStyleAssets    $styleAssets,
         protected TranslatorInterface $translator,
-    ) {
+    )
+    {
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
